@@ -13,10 +13,17 @@ function App() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const activeTab = tabs[0];
       if (!activeTab || !activeTab.id) {
+        console.error("NURETests: No active tab found.");
         setStatus("error");
         setErrorMsg("No active tab found.");
         return;
       }
+
+      console.log("NURETests: Active tab queried:", {
+        id: activeTab.id,
+        url: activeTab.url,
+        title: activeTab.title,
+      });
 
       // Send run command
       chrome.tabs.sendMessage(
@@ -24,15 +31,26 @@ function App() {
         { action: "runParser" },
         (response) => {
           if (chrome.runtime.lastError) {
+            const errMsg =
+              chrome.runtime.lastError.message || "Unknown communication error";
+            console.error(
+              "NURETests: Communication error:",
+              chrome.runtime.lastError,
+            );
             setStatus("error");
             setErrorMsg(
-              "Please refresh the moodle page or make sure you are on a quiz page.",
+              `Failed to reach the page. Please refresh the page or verify you are on a Moodle quiz.\n\nDetail: ${errMsg}\nURL: ${activeTab.url || "unknown"}`,
             );
           } else if (response && response.success) {
+            console.log("NURETests: Scraper triggered successfully on tab.");
             setStatus("success");
+            // Auto-close the popup so the overlay is visible
+            setTimeout(() => window.close(), 500);
           } else {
+            const errMsg = response ? response.error : "Failed to run parser.";
+            console.error("NURETests: Scraper error response:", response);
             setStatus("error");
-            setErrorMsg(response ? response.error : "Failed to run parser.");
+            setErrorMsg(errMsg);
           }
         },
       );
@@ -45,7 +63,7 @@ function App() {
       <header className="flex items-center justify-between border-b border-slate-800/80 pb-3">
         <div className="flex items-center gap-2">
           <img
-            src="/favicon.png"
+            src="/favicon.ico"
             className="w-6 h-6 rounded object-cover shadow"
             alt="NURETests logo"
           />
@@ -164,7 +182,9 @@ function App() {
               <h3 className="text-sm font-semibold text-rose-400">
                 Parsing Failed
               </h3>
-              <p className="text-xs text-slate-400 line-clamp-2">{errorMsg}</p>
+              <p className="text-xs text-slate-400 whitespace-pre-wrap break-all">
+                {errorMsg}
+              </p>
             </div>
           </div>
         )}

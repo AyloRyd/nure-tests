@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+/* 
+  Force solid borders for any element that uses Tailwind's border classes.
+  This is a critical fallback for Shadow DOM environments and older browsers 
+  where Tailwind v4's CSS Houdini `@property` definition for `--tw-border-style` 
+  is not recognized or fails to propagate.
+*/
+*,
+*::before,
+*::after {
+  border-style: solid;
+  border-width: 0;
+}

@@ -1,5 +1,5 @@
-import type { Question } from '../types';
-import { parseQuestionBlock } from './parser';
+import type { Question } from "../types";
+import { parseQuestionBlock } from "./parser";
 
 export function getBaseUrlAndParams(currentUrl: string): {
   baseUrl: string;
@@ -17,18 +17,18 @@ export function getBaseUrlAndParams(currentUrl: string): {
 export function generatePageUrl(
   baseUrl: string,
   params: Record<string, string>,
-  pageNum: number
+  pageNum: number,
 ): string {
   const urlObj = new URL(baseUrl);
   Object.entries(params).forEach(([key, value]) => {
     urlObj.searchParams.set(key, value);
   });
-  urlObj.searchParams.set('page', String(pageNum));
+  urlObj.searchParams.set("page", String(pageNum));
   return urlObj.toString();
 }
 
 export function getTotalQuestionsCount(doc: Document): number {
-  const questionButtons = doc.querySelectorAll('.qnbutton');
+  const questionButtons = doc.querySelectorAll(".qnbutton");
   return questionButtons.length;
 }
 
@@ -41,14 +41,14 @@ export interface ScraperCallbacks {
 export async function runScraper(
   currentUrl: string,
   doc: Document,
-  callbacks?: ScraperCallbacks
+  callbacks?: ScraperCallbacks,
 ): Promise<Question[]> {
   const { baseUrl, params } = getBaseUrlAndParams(currentUrl);
   const totalQuestions = getTotalQuestionsCount(doc);
 
   if (callbacks?.onLog) {
     callbacks.onLog(
-      `Found ${totalQuestions} questions in total. Starting extraction...`
+      `Found ${totalQuestions} questions in total. Starting extraction...`,
     );
   }
 
@@ -68,9 +68,9 @@ export async function runScraper(
       }
       const html = await response.text();
       const parser = new DOMParser();
-      const pageDoc = parser.parseFromString(html, 'text/html');
+      const pageDoc = parser.parseFromString(html, "text/html");
 
-      const questionContainers = pageDoc.querySelectorAll('.que');
+      const questionContainers = pageDoc.querySelectorAll(".que");
       questionContainers.forEach((container) => {
         const question = parseQuestionBlock(container, questionIndex + 1);
         quizData.push(question);
@@ -92,7 +92,7 @@ export async function runScraper(
   }
 
   if (callbacks?.onLog) {
-    callbacks.onLog('Quiz parsing complete!');
+    callbacks.onLog("Quiz parsing complete!");
   }
 
   return quizData;

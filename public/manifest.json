@@ -9,11 +9,11 @@
     "default_popup": "index.html",
     "default_title": "NURETests",
     "default_icon": {
-      "32": "favicon.png"
+      "32": "favicon.ico"
     }
   },
   "icons": {
-    "128": "favicon.png"
+    "128": "favicon.ico"
   },
   "content_scripts": [
     {
@@ -24,12 +24,8 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": [
-        "assets/*"
-      ],
-      "matches": [
-        "*://dl.nure.ua/*"
-      ]
+      "resources": ["assets/*"],
+      "matches": ["*://dl.nure.ua/*"]
     }
   ]
 }

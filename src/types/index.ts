@@ -1,4 +1,4 @@
-export type AnswerType = 'SingleAnswer' | 'MultipleAnswer' | 'Unknown';
+export type AnswerType = "SingleAnswer" | "MultipleAnswer" | "Unknown";
 
 export interface Question {
   index: number;
@@ -10,7 +10,7 @@ export interface Question {
 export interface ScrapeProgress {
   currentPage: number;
   totalPages: number;
-  status: 'idle' | 'scraping' | 'completed' | 'error';
+  status: "idle" | "scraping" | "completed" | "error";
   logs: string[];
   output: string;
 }

@@ -1,31 +1,31 @@
-import type { Question, AnswerType } from '../types';
+import type { Question, AnswerType } from "../types";
 
 export function getQuestion(container: Element): string {
-  const questionElement = container.querySelector('.qtext');
+  const questionElement = container.querySelector(".qtext");
   return questionElement
-    ? questionElement.textContent?.trim() || 'No question found'
-    : 'No question found';
+    ? questionElement.textContent?.trim() || "No question found"
+    : "No question found";
 }
 
 export function getAnswersType(container: Element): AnswerType {
-  const answerContainer = container.querySelector('.answer');
-  if (!answerContainer) return 'Unknown';
+  const answerContainer = container.querySelector(".answer");
+  if (!answerContainer) return "Unknown";
   const radioInputs = answerContainer.querySelectorAll('input[type="radio"]');
   const checkboxInputs = answerContainer.querySelectorAll(
-    'input[type="checkbox"]'
+    'input[type="checkbox"]',
   );
   if (radioInputs.length > 0) {
-    return 'SingleAnswer';
+    return "SingleAnswer";
   } else if (checkboxInputs.length > 0) {
-    return 'MultipleAnswer';
+    return "MultipleAnswer";
   } else {
-    return 'Unknown';
+    return "Unknown";
   }
 }
 
 export function getAnswers(container: Element): string[] {
   const answerElements = container.querySelectorAll(
-    '[data-region="answer-label"]'
+    '[data-region="answer-label"]',
   );
   const answers: string[] = [];
   answerElements.forEach((element) => {
@@ -39,7 +39,7 @@ export function getAnswers(container: Element): string[] {
 
 export function parseQuestionBlock(
   container: Element,
-  index: number
+  index: number,
 ): Question {
   return {
     index,
