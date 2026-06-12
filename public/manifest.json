@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "DL NURE Test Parser",
+  "version": "1.0.0",
+  "description": "Parses questions on dl.nure.ua Moodle test pages",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://dl.nure.ua/*"
+  ],
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "DL NURE Test Parser"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://dl.nure.ua/mod/quiz/*"
+      ],
+      "js": [
+        "assets/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
