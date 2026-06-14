@@ -2,15 +2,21 @@ import { useState, useEffect } from "react";
 import type { Question, ScrapeProgress } from "../../types";
 import { runScraper } from "../../core/scraper";
 
-export function useScraper(onScrapeFinish?: (questions: Question[]) => void) {
-  const [status, setStatus] = useState<ScrapeProgress["status"]>("scraping");
+export function useScraper(
+  enabled: boolean,
+  onScrapeFinish?: (questions: Question[]) => void,
+) {
+  const [status, setStatus] = useState<ScrapeProgress["status"]>("idle");
   const [logs, setLogs] = useState<string[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
 
   useEffect(() => {
+    if (!enabled) return;
+
     let active = true;
 
     const run = async () => {
+      setStatus("scraping");
       try {
         const parsedQuestions = await runScraper(
           window.location.href,
@@ -48,7 +54,7 @@ export function useScraper(onScrapeFinish?: (questions: Question[]) => void) {
     return () => {
       active = false;
     };
-  }, [onScrapeFinish]);
+  }, [enabled, onScrapeFinish]);
 
   return {
     status,

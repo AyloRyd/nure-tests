@@ -25,27 +25,34 @@ function App() {
         title: activeTab.title,
       });
 
+      const url = activeTab.url || "";
+      const isMoodleQuiz = url.includes("dl.nure.ua/mod/quiz");
+
+      if (!isMoodleQuiz) {
+        setStatus("error");
+        setErrorMsg(
+          "This page does not seem to be a dl.nure.ua Moodle quiz page.",
+        );
+        return;
+      }
+
       // Send run command
       chrome.tabs.sendMessage(
         activeTab.id,
         { action: "runParser" },
         (response) => {
           if (chrome.runtime.lastError) {
-            const errMsg =
-              chrome.runtime.lastError.message || "Unknown communication error";
             console.error(
               "NURETests: Communication error:",
               chrome.runtime.lastError,
             );
             setStatus("error");
-            setErrorMsg(
-              `Failed to reach the page. Please refresh the page or verify you are on a Moodle quiz.\n\nDetail: ${errMsg}\nURL: ${activeTab.url || "unknown"}`,
-            );
+            setErrorMsg("Failed to establish connection to the page.");
           } else if (response && response.success) {
             console.log("NURETests: Scraper triggered successfully on tab.");
             setStatus("success");
             // Auto-close the popup so the overlay is visible
-            setTimeout(() => window.close(), 500);
+            window.close();
           } else {
             const errMsg = response ? response.error : "Failed to run parser.";
             console.error("NURETests: Scraper error response:", response);
@@ -81,7 +88,6 @@ function App() {
         </span>
       </header>
 
-      {/* Main Container */}
       <main className="flex-1 my-5 flex flex-col justify-center">
         {status === "idle" && (
           <div className="text-center space-y-4">
@@ -103,7 +109,7 @@ function App() {
             </div>
             <div className="space-y-1">
               <h3 className="text-sm font-semibold text-slate-200">
-                Ready to Parse
+                Ready to parse
               </h3>
               <p className="text-xs text-slate-400 px-4">
                 Open a moodle test page and click below to scrape the quiz
@@ -121,7 +127,7 @@ function App() {
             </div>
             <div className="space-y-1">
               <h3 className="text-sm font-semibold text-slate-200">
-                Parsing Quiz Questions...
+                Parsing quiz questions...
               </h3>
               <p className="text-xs text-slate-400">
                 Processing pages. Check the page overlay for details.
@@ -180,9 +186,9 @@ function App() {
             </div>
             <div className="space-y-1 px-4">
               <h3 className="text-sm font-semibold text-rose-400">
-                Parsing Failed
+                Parsing failed
               </h3>
-              <p className="text-xs text-slate-400 whitespace-pre-wrap break-all">
+              <p className="text-xs text-slate-400 whitespace-pre-wrap break-words leading-relaxed">
                 {errorMsg}
               </p>
             </div>
@@ -190,14 +196,13 @@ function App() {
         )}
       </main>
 
-      {/* Footer / Trigger Button */}
       <footer className="space-y-3">
         <button
           onClick={handleRunParser}
           disabled={status === "running"}
           className="w-full py-2.5 px-4 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 active:scale-[0.98] transition text-sm font-semibold shadow-lg shadow-indigo-600/20 disabled:opacity-50 disabled:pointer-events-none disabled:transform-none cursor-pointer"
         >
-          {status === "running" ? "Extracting..." : "Run Parser"}
+          {status === "running" ? "Extracting..." : "Run parser"}
         </button>
         <p className="text-[9px] text-center text-slate-600">
           Must be on dl.nure.ua quiz attempt or review page
