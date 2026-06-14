@@ -52,6 +52,7 @@ export function useOverlay() {
     status,
     logs,
     questions: scrapedQuestions,
+    reset: resetScraper,
   } = useScraper(
     hasConfirmedWarning && hasQuestionsOnPage,
     handleScrapeFinish,
@@ -147,6 +148,7 @@ export function useOverlay() {
     handleConfirmWarning,
     handleAnswersImport,
     resetAnswers,
+    resetScraper,
     getOutputText,
   };
 }

@@ -8,10 +8,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, "..");
 const PAGES_DIR = path.join(ROOT_DIR, ".pages");
+const DEFAULT_DIR = path.join(PAGES_DIR, "default");
 
-// Create .pages if it doesn't exist
+// Create .pages and .pages/default if they don't exist
 if (!fs.existsSync(PAGES_DIR)) {
   fs.mkdirSync(PAGES_DIR, { recursive: true });
+}
+if (!fs.existsSync(DEFAULT_DIR)) {
+  fs.mkdirSync(DEFAULT_DIR, { recursive: true });
 }
 
 function escapeHtml(str) {
@@ -117,6 +121,9 @@ function proxyToMoodle(req, res) {
   req.pipe(proxyReq);
 }
 
+// Keep track of the active folder by Moodle attempt ID to support folder-specific offline mock tests
+const activeFolderMap = new Map();
+
 const server = http.createServer((req, res) => {
   // Set CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -153,7 +160,7 @@ const server = http.createServer((req, res) => {
           <div class="quiz-card">
             <h3>${escapeHtml(att.label)}</h3>
             <p>Folder: <span class="badge">${escapeHtml(att.folder || "root")}</span> | Attempt ID: <span class="badge">${escapeHtml(att.attemptId)}</span></p>
-            <a href="/mod/quiz/attempt.php?attempt=${att.attemptId}&page=0">Start Mock Quiz Page 1 &rarr;</a>
+            <a href="/mod/quiz/attempt.php?attempt=${att.attemptId}&page=0&folder=${encodeURIComponent(att.folder || "")}">Start Mock Quiz Page 1 &rarr;</a>
           </div>
         `,
           )
@@ -196,6 +203,7 @@ const server = http.createServer((req, res) => {
   // 2. Mock attempt page serving
   if (req.method === "GET" && pathname === "/mod/quiz/attempt.php") {
     const attemptId = parsedUrl.searchParams.get("attempt");
+    const folderParam = parsedUrl.searchParams.get("folder");
     const pageStr = parsedUrl.searchParams.get("page") || "0";
     const pageNum = parseInt(pageStr, 10) + 1; // Moodle is 0-indexed, file prefix is 1-indexed
 
@@ -205,11 +213,20 @@ const server = http.createServer((req, res) => {
       return;
     }
 
+    // If folder is specified in URL, update/set active folder for this attempt.
+    if (folderParam !== null) {
+      activeFolderMap.set(attemptId, folderParam);
+    }
+    const activeFolder = activeFolderMap.get(attemptId) || "";
+
     console.log(
-      `[Dev Server] Serving attempt ${attemptId}, page ${pageNum} (page param ${pageStr})`,
+      `[Dev Server] Serving attempt ${attemptId}, folder "${activeFolder}", page ${pageNum} (page param ${pageStr})`,
     );
 
-    const filePath = findSavedFile(PAGES_DIR, pageNum, attemptId);
+    const searchDir = activeFolder
+      ? path.join(PAGES_DIR, activeFolder)
+      : PAGES_DIR;
+    const filePath = findSavedFile(searchDir, pageNum, attemptId);
     if (filePath && fs.existsSync(filePath)) {
       let htmlContent = fs.readFileSync(filePath, "utf8");
 
@@ -229,6 +246,59 @@ const server = http.createServer((req, res) => {
         "",
       );
 
+      // Inject local navigation helper script to intercept form submissions (Next/Prev buttons)
+      const navScript = `
+        <script>
+          (function() {
+            document.addEventListener("DOMContentLoaded", () => {
+              const form = document.getElementById("responseform");
+              if (!form) return;
+
+              let clickedButtonName = null;
+              form.addEventListener("click", (e) => {
+                const button = e.target.closest("input[type=submit], button[type=submit]");
+                if (button) {
+                  clickedButtonName = button.name;
+                }
+              });
+
+              form.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const urlParams = new URLSearchParams(window.location.search);
+                const attemptId = urlParams.get("attempt");
+                const pageStr = urlParams.get("page") || "0";
+                const currentPage = parseInt(pageStr, 10);
+                const folder = urlParams.get("folder") || "";
+
+                let nextPage = currentPage;
+                if (clickedButtonName === "next") {
+                  nextPage = currentPage + 1;
+                } else if (clickedButtonName === "previous") {
+                  nextPage = currentPage - 1;
+                } else {
+                  console.log("[Dev Server] Form submitted by other action: " + clickedButtonName);
+                  return; // Don't redirect if it's not a Next/Prev navigation
+                }
+
+                const newUrl = window.location.pathname + 
+                  "?attempt=" + encodeURIComponent(attemptId) + 
+                  "&page=" + nextPage + 
+                  (folder ? "&folder=" + encodeURIComponent(folder) : "");
+
+                console.log("[Dev Server] Redirecting locally to: " + newUrl);
+                window.location.href = newUrl;
+              });
+            });
+          })();
+        </script>
+      `;
+
+      if (htmlContent.includes("</body>")) {
+        htmlContent = htmlContent.replace("</body>", `${navScript}\n</body>`);
+      } else {
+        htmlContent += navScript;
+      }
+
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       res.end(htmlContent);
     } else {
@@ -238,7 +308,7 @@ const server = http.createServer((req, res) => {
 <head><title>Page Not Found</title></head>
 <body style="font-family: sans-serif; background: #0f172a; color: #f8fafc; padding: 2rem; text-align: center;">
   <h1 style="color: #f87171;">Saved Page Not Found</h1>
-  <p>Could not find page file starting with <code>page_${pageNum}_</code> for attempt <code>${attemptId}</code> in the <code>.pages/</code> folder.</p>
+  <p>Could not find page file starting with <code>page_${pageNum}_</code> for attempt <code>${attemptId}</code> in the <code>${activeFolder ? ".pages/" + activeFolder : ".pages/"}</code> folder.</p>
   <p><a href="/" style="color: #38bdf8; text-decoration: none;">&larr; Back to Dashboard</a></p>
 </body>
 </html>`);
@@ -262,7 +332,7 @@ const server = http.createServer((req, res) => {
         // Clean URL to make it safe for filenames
         const cleanUrl = url.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 50);
         const filename = `page_${pageNum}_${cleanUrl}.html`;
-        const filepath = path.join(PAGES_DIR, filename);
+        const filepath = path.join(DEFAULT_DIR, filename);
 
         // Write the HTML file with a comment containing the URL at the top
         const contentToWrite = `<!-- Saved from: ${url} at ${new Date().toISOString()} -->\n${html}`;

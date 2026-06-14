@@ -17,6 +17,23 @@ export function useScraper(
   const hasStarted = useRef(initialQuestions && initialQuestions.length > 0);
 
   useEffect(() => {
+    if (initialQuestions && initialQuestions.length > 0) {
+      if (!hasStarted.current) {
+        hasStarted.current = true;
+        setStatus("completed");
+        setQuestions(initialQuestions);
+      }
+    }
+  }, [initialQuestions]);
+
+  const reset = () => {
+    hasStarted.current = false;
+    setStatus("idle");
+    setLogs([]);
+    setQuestions([]);
+  };
+
+  useEffect(() => {
     if (!enabled || hasStarted.current) return;
     hasStarted.current = true;
 
@@ -67,5 +84,6 @@ export function useScraper(
     status,
     logs,
     questions,
+    reset,
   };
 }

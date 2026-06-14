@@ -5,6 +5,7 @@ import { OverlayContent } from "./OverlayContent";
 import { OverlayFooter } from "./OverlayFooter";
 import { loadSession } from "../../core/storage";
 import { useStore } from "../store/useStore";
+import { clearAllSelectedAnswers } from "../utils/AnswerSelector";
 
 interface OverlayProps {
   onClose: () => void;
@@ -21,6 +22,20 @@ export const Overlay: React.FC<OverlayProps> = ({ onClose }) => {
       }
     });
   }, []);
+
+  const resetAllState = useStore((s) => s.resetAllState);
+  const handleResetAll = () => {
+    resetAllState();
+    state.resetScraper();
+
+    // Only clear selected answers on local mock pages to prevent wiping real answers on dl.nure.ua
+    const isLocalMockPage =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+    if (isLocalMockPage) {
+      clearAllSelectedAnswers();
+    }
+  };
 
   return (
     <div
@@ -45,6 +60,7 @@ export const Overlay: React.FC<OverlayProps> = ({ onClose }) => {
         onToggleCollapse={state.handleToggleCollapse}
         uiPosition={state.uiPosition}
         onTogglePosition={state.handleTogglePosition}
+        onResetAll={handleResetAll}
       />
 
       <OverlayContent state={state} onClose={onClose} />
@@ -61,6 +77,7 @@ export const Overlay: React.FC<OverlayProps> = ({ onClose }) => {
           showAutoSelect={state.activeMainTab === "import-answers"}
           autoSelect={state.autoSelect}
           onToggleAutoSelect={state.setAutoSelect}
+          activeMainTab={state.activeMainTab}
         />
       )}
     </div>

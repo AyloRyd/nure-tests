@@ -8,6 +8,7 @@ interface OverlayFooterProps {
   autoSelect?: boolean;
   onToggleAutoSelect?: (val: boolean) => void;
   showAutoSelect: boolean;
+  activeMainTab?: string;
 }
 
 export const OverlayFooter: React.FC<OverlayFooterProps> = ({
@@ -17,8 +18,11 @@ export const OverlayFooter: React.FC<OverlayFooterProps> = ({
   autoSelect = true,
   onToggleAutoSelect,
   showAutoSelect,
+  activeMainTab,
 }) => {
   const isOnlyCopy = showCopyButton && !showAutoSelect;
+  const buttonColorClass =
+    activeMainTab === "import-answers" ? "bg-[#1c1d53]" : "bg-[#0a1024]";
 
   return (
     <div
@@ -48,8 +52,8 @@ export const OverlayFooter: React.FC<OverlayFooterProps> = ({
           onClick={onCopy}
           className={
             isOnlyCopy
-              ? "w-full h-full bg-[#0a1024] hover:bg-slate-800 active:bg-slate-900 transition-colors duration-150 text-xs font-bold cursor-pointer flex items-center justify-center gap-1.5 text-slate-100 font-sans select-none rounded-none"
-              : "py-1.5 px-3 rounded-lg bg-[#0a1024] hover:bg-slate-800 border border-slate-800/80 active:scale-[0.98] transition-all duration-150 text-[10px] font-bold shadow-lg shadow-slate-950/10 cursor-pointer flex items-center justify-center gap-1.5 text-slate-100 font-sans select-none"
+              ? `w-full h-full ${buttonColorClass} hover:bg-slate-800 active:bg-slate-900 transition-colors duration-150 text-xs font-bold cursor-pointer flex items-center justify-center gap-1.5 text-slate-100 font-sans select-none rounded-none`
+              : `py-1.5 px-3 rounded-lg ${buttonColorClass} hover:bg-slate-800 border border-slate-800/80 active:scale-[0.98] transition-all duration-150 text-[10px] font-bold shadow-lg shadow-slate-950/10 cursor-pointer flex items-center justify-center gap-1.5 text-slate-100 font-sans select-none`
           }
         >
           {copyFeedback ? (

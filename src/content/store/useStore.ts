@@ -27,6 +27,7 @@ interface StoreState {
   setCopyFeedback: (feedback: string | null) => void;
   setQuestions: (questions: Question[]) => void;
   resetAnswers: () => void;
+  resetAllState: () => void;
 }
 
 export const useStore = create<StoreState>((set) => ({
@@ -107,6 +108,22 @@ export const useStore = create<StoreState>((set) => ({
   resetAnswers: () => {
     set({ aiAnswers: null });
     saveSession({ aiAnswers: null });
+    clearSession();
+  },
+
+  resetAllState: () => {
+    set({
+      activeMainTab: "parse-test",
+      activeSubTab: "current-questions",
+      hasConfirmedWarning: false,
+      aiAnswers: null,
+      isCollapsed: false,
+      uiPosition: "right",
+      autoSelect: true,
+      outputFormat: "standard",
+      copyFeedback: null,
+      questions: [],
+    });
     clearSession();
   },
 }));

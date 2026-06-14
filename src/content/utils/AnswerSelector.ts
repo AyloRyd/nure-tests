@@ -176,3 +176,44 @@ export function autoSelectAllVisibleQuestions(answers: AiAnswers): number {
 
   return matchCount;
 }
+
+/**
+ * Clear all selected answers (radios, checkboxes, text inputs, selects) on the current page.
+ */
+export function clearAllSelectedAnswers(): void {
+  const questionBlocks = document.querySelectorAll(".que");
+  questionBlocks.forEach((block) => {
+    // 1. Clear radios & checkboxes
+    const inputs = block.querySelectorAll(
+      'input[type="radio"], input[type="checkbox"]',
+    );
+    inputs.forEach((input) => {
+      const htmlInput = input as HTMLInputElement;
+      if (htmlInput.checked) {
+        htmlInput.checked = false;
+        htmlInput.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+
+    // 2. Clear text inputs & textareas
+    const textInputs = block.querySelectorAll('input[type="text"], textarea');
+    textInputs.forEach((input) => {
+      const htmlInput = input as HTMLInputElement | HTMLTextAreaElement;
+      if (htmlInput.value !== "") {
+        htmlInput.value = "";
+        htmlInput.dispatchEvent(new Event("input", { bubbles: true }));
+        htmlInput.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+
+    // 3. Clear selects
+    const selects = block.querySelectorAll("select");
+    selects.forEach((select) => {
+      const htmlSelect = select as HTMLSelectElement;
+      if (htmlSelect.selectedIndex !== 0 && htmlSelect.options.length > 0) {
+        htmlSelect.selectedIndex = 0; // Usually the first option is the "Choose..." or blank option
+        htmlSelect.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+  });
+}

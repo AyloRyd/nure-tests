@@ -43,39 +43,44 @@ export async function loadSession(): Promise<StoredSession | null> {
   }
 }
 
+let saveQueue: Promise<void> = Promise.resolve();
+
 /** Save/merge session state for the current Moodle quiz attempt. */
 export async function saveSession(
   updates: Partial<Omit<StoredSession, "attemptId" | "timestamp">>,
 ): Promise<void> {
-  const attemptId = getAttemptId();
-  if (!attemptId) return;
+  saveQueue = saveQueue.then(async () => {
+    const attemptId = getAttemptId();
+    if (!attemptId) return;
 
-  try {
-    const result = await chrome.storage.local.get(STORAGE_KEY);
-    const existing = (result[STORAGE_KEY] || {}) as Partial<StoredSession>;
+    try {
+      const result = await chrome.storage.local.get(STORAGE_KEY);
+      const existing = (result[STORAGE_KEY] || {}) as Partial<StoredSession>;
 
-    // Ensure we only merge if the attempt ID matches, otherwise start fresh
-    const base = existing.attemptId === attemptId ? existing : {};
+      const base = existing.attemptId === attemptId ? existing : {};
 
-    const updated: StoredSession = {
-      attemptId,
-      isOpen: base.isOpen ?? false,
-      isCollapsed: base.isCollapsed ?? false,
-      activeMainTab: base.activeMainTab ?? "parse-test",
-      activeSubTab: base.activeSubTab ?? "current-questions",
-      hasConfirmedWarning: base.hasConfirmedWarning ?? false,
-      questions: base.questions ?? [],
-      aiAnswers: base.aiAnswers ?? null,
-      uiPosition: base.uiPosition ?? "right",
-      autoSelect: base.autoSelect ?? true,
-      ...updates,
-      timestamp: Date.now(),
-    };
+      const updated: StoredSession = {
+        attemptId,
+        isOpen: base.isOpen ?? false,
+        isCollapsed: base.isCollapsed ?? false,
+        activeMainTab: base.activeMainTab ?? "parse-test",
+        activeSubTab: base.activeSubTab ?? "current-questions",
+        hasConfirmedWarning: base.hasConfirmedWarning ?? false,
+        questions: base.questions ?? [],
+        aiAnswers: base.aiAnswers ?? null,
+        uiPosition: base.uiPosition ?? "right",
+        autoSelect: base.autoSelect ?? true,
+        ...updates,
+        timestamp: Date.now(),
+      };
 
-    await chrome.storage.local.set({ [STORAGE_KEY]: updated });
-  } catch (err) {
-    console.error("Failed to save session state:", err);
-  }
+      await chrome.storage.local.set({ [STORAGE_KEY]: updated });
+    } catch (err) {
+      console.error("Failed to save session state:", err);
+    }
+  });
+
+  return saveQueue;
 }
 
 /** Clear the persisted session. */

@@ -1,6 +1,6 @@
 import React from "react";
 import type { ScrapeProgress } from "../../types";
-import { Columns2, Minus, Maximize2, X } from "lucide-react";
+import { Columns2, Minus, Maximize2, X, RotateCcw } from "lucide-react";
 
 interface OverlayHeaderProps {
   status: ScrapeProgress["status"];
@@ -9,6 +9,7 @@ interface OverlayHeaderProps {
   onToggleCollapse: () => void;
   uiPosition: "left" | "right";
   onTogglePosition: () => void;
+  onResetAll?: () => void;
 }
 
 export const OverlayHeader: React.FC<OverlayHeaderProps> = ({
@@ -18,6 +19,7 @@ export const OverlayHeader: React.FC<OverlayHeaderProps> = ({
   onToggleCollapse,
   uiPosition,
   onTogglePosition,
+  onResetAll,
 }) => {
   return (
     <header className="px-4 py-3 bg-slate-950/80 flex justify-between items-center select-none shrink-0">
@@ -38,6 +40,13 @@ export const OverlayHeader: React.FC<OverlayHeaderProps> = ({
         </h2>
       </div>
       <div className="flex items-center gap-2">
+        <button
+          onClick={onResetAll}
+          className="text-slate-400 hover:text-slate-200 transition cursor-pointer w-7 h-7 flex items-center justify-center hover:bg-slate-800 rounded-lg"
+          title="Fresh Start (Delete all state)"
+        >
+          <RotateCcw size={12} />
+        </button>
         <button
           onClick={onTogglePosition}
           className="text-slate-400 hover:text-slate-200 transition cursor-pointer w-7 h-7 flex items-center justify-center hover:bg-slate-800 rounded-lg"
