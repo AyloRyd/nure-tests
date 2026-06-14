@@ -1,4 +1,5 @@
 import React from "react";
+import { Copy, Check } from "lucide-react";
 
 interface OverlayFooterProps {
   onCopy?: () => void;
@@ -47,41 +48,18 @@ export const OverlayFooter: React.FC<OverlayFooterProps> = ({
           onClick={onCopy}
           className={
             isOnlyCopy
-              ? "w-full h-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-colors duration-150 text-xs font-bold cursor-pointer flex items-center justify-center gap-1.5 text-slate-100 font-sans select-none rounded-none"
-              : "py-1.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] transition-all duration-150 text-[10px] font-bold shadow-lg shadow-indigo-600/10 cursor-pointer flex items-center justify-center gap-1.5 text-slate-100 font-sans select-none"
+              ? "w-full h-full bg-[#0a1024] hover:bg-slate-800 active:bg-slate-900 transition-colors duration-150 text-xs font-bold cursor-pointer flex items-center justify-center gap-1.5 text-slate-100 font-sans select-none rounded-none"
+              : "py-1.5 px-3 rounded-lg bg-[#0a1024] hover:bg-slate-800 border border-slate-800/80 active:scale-[0.98] transition-all duration-150 text-[10px] font-bold shadow-lg shadow-slate-950/10 cursor-pointer flex items-center justify-center gap-1.5 text-slate-100 font-sans select-none"
           }
         >
           {copyFeedback ? (
             <>
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+              <Check size={13} />
               {copyFeedback}
             </>
           ) : (
             <>
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
+              <Copy size={13} />
               Copy to Clipboard
             </>
           )}

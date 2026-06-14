@@ -131,7 +131,7 @@ const server = http.createServer((req, res) => {
 
   const parsedUrl = new URL(
     req.url,
-    `http://${req.headers.host || "localhost:3001"}`,
+    `http://${req.headers.host || "localhost:3010"}`,
   );
   const pathname = parsedUrl.pathname;
 
@@ -216,11 +216,11 @@ const server = http.createServer((req, res) => {
       // Rewrite dl.nure.ua references so assets (CSS, JS, images) load via our local proxy
       htmlContent = htmlContent.replaceAll(
         "https://dl.nure.ua",
-        "http://localhost:3001",
+        "http://localhost:3010",
       );
       htmlContent = htmlContent.replaceAll(
         "https:\\/\\/dl.nure.ua",
-        "http:\\/\\/localhost:3001",
+        "http:\\/\\/localhost:3010",
       );
 
       // Strip Moodle script tags to prevent automatic redirects and auth checks in local mock mode
@@ -284,8 +284,8 @@ const server = http.createServer((req, res) => {
   proxyToMoodle(req, res);
 });
 
-server.listen(3001, "localhost", () => {
+server.listen(3010, "localhost", () => {
   console.log(
-    "[Dev Server] Running on http://localhost:3001 - listening for mock pages, saves & proxying dl.nure.ua static resources",
+    "[Dev Server] Running on http://localhost:3010 - listening for mock pages, saves & proxying dl.nure.ua static resources",
   );
 });

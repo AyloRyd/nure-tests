@@ -35,7 +35,6 @@ export const AnswersImporter: React.FC<AnswersImporterProps> = ({
         );
       }
 
-      // Check types roughly (keys must be strings, values must be arrays of strings)
       const answers: AiAnswers = {};
       Object.entries(parsed).forEach(([key, val]) => {
         if (!Array.isArray(val)) {
@@ -48,7 +47,6 @@ export const AnswersImporter: React.FC<AnswersImporterProps> = ({
 
       onAnswersImport(answers);
 
-      // Auto-select questions on page immediately
       const matched = autoSelectAllVisibleQuestions(answers);
       setSuccessCount(matched);
     } catch (err: unknown) {

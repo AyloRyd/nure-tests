@@ -9,7 +9,6 @@ interface LogsTerminalProps {
 export const LogsTerminal: React.FC<LogsTerminalProps> = ({ logs, status }) => {
   const logsEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto scroll logs on new prints
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);

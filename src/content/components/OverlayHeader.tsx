@@ -1,5 +1,6 @@
 import React from "react";
 import type { ScrapeProgress } from "../../types";
+import { Columns2, Minus, Maximize2, X } from "lucide-react";
 
 interface OverlayHeaderProps {
   status: ScrapeProgress["status"];
@@ -42,74 +43,21 @@ export const OverlayHeader: React.FC<OverlayHeaderProps> = ({
           className="text-slate-400 hover:text-slate-200 transition cursor-pointer w-7 h-7 flex items-center justify-center hover:bg-slate-800 rounded-lg"
           title={`Dock to ${uiPosition === "right" ? "left" : "right"}`}
         >
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            {uiPosition === "right" ? (
-              <line x1="9" y1="3" x2="9" y2="21" />
-            ) : (
-              <line x1="15" y1="3" x2="15" y2="21" />
-            )}
-          </svg>
+          <Columns2 size={13} />
         </button>
         <button
           onClick={onToggleCollapse}
           className="text-slate-400 hover:text-slate-200 transition cursor-pointer w-7 h-7 flex items-center justify-center hover:bg-slate-800 rounded-lg"
           title={isCollapsed ? "Restore window" : "Minimize window"}
         >
-          {isCollapsed ? (
-            <svg
-              width="11"
-              height="11"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-            </svg>
-          ) : (
-            <svg
-              width="11"
-              height="11"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          )}
+          {isCollapsed ? <Maximize2 size={11} /> : <Minus size={11} />}
         </button>
         <button
           onClick={onClose}
           className="text-slate-400 hover:text-slate-200 transition cursor-pointer w-7 h-7 flex items-center justify-center hover:bg-rose-500/20 rounded-lg"
           title="Close"
         >
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 10 10"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          >
-            <line x1="1" y1="1" x2="9" y2="9" />
-            <line x1="9" y1="1" x2="1" y2="9" />
-          </svg>
+          <X size={14} />
         </button>
       </div>
     </header>

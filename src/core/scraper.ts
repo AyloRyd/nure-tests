@@ -71,7 +71,7 @@ export async function runScraper(
       const html = await response.text();
 
       if (typeof __DEV__ !== "undefined" && __DEV__) {
-        fetch("http://localhost:3001/api/save-page", {
+        fetch("http://localhost:3010/api/save-page", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ pageNum: pageNum + 1, html, url: pageUrl }),

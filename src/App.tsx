@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FileText, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
 function App() {
   const [status, setStatus] = useState<
@@ -37,7 +38,6 @@ function App() {
         return;
       }
 
-      // Send run command
       chrome.tabs.sendMessage(
         activeTab.id,
         { action: "runParser" },
@@ -52,7 +52,6 @@ function App() {
           } else if (response && response.success) {
             console.log("NURETests: Scraper triggered successfully on tab.");
             setStatus("success");
-            // Auto-close the popup so the overlay is visible
             window.close();
           } else {
             const errMsg = response ? response.error : "Failed to run parser.";
@@ -67,7 +66,6 @@ function App() {
 
   return (
     <div className="w-[380px] min-h-[320px] bg-slate-950 text-slate-100 p-5 font-sans flex flex-col justify-between selection:bg-indigo-500/30">
-      {/* Header */}
       <header className="flex items-center justify-between border-b border-slate-800/80 pb-3">
         <div className="flex items-center gap-2">
           <img
@@ -93,27 +91,14 @@ function App() {
         {status === "idle" && (
           <div className="text-center space-y-4">
             <div className="mx-auto w-12 h-12 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
-                />
-              </svg>
+              <FileText className="w-6 h-6" />
             </div>
             <div className="space-y-1">
               <h3 className="text-sm font-semibold text-slate-200">
                 Ready to parse
               </h3>
               <p className="text-xs text-slate-400 px-4">
-                Open a moodle test page and click below to scrape the quiz
+                Open a Moodle test page and click below to scrape the quiz
                 questions.
               </p>
             </div>
@@ -122,9 +107,8 @@ function App() {
 
         {status === "running" && (
           <div className="text-center space-y-3">
-            <div className="relative mx-auto w-10 h-10 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border-2 border-indigo-500/20"></div>
-              <div className="absolute inset-0 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin"></div>
+            <div className="mx-auto w-10 h-10 flex items-center justify-center text-indigo-400">
+              <Loader2 className="w-10 h-10 animate-spin" />
             </div>
             <div className="space-y-1">
               <h3 className="text-sm font-semibold text-slate-200">
@@ -140,20 +124,7 @@ function App() {
         {status === "success" && (
           <div className="text-center space-y-4">
             <div className="mx-auto w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                />
-              </svg>
+              <CheckCircle2 className="w-6 h-6" />
             </div>
             <div className="space-y-1">
               <h3 className="text-sm font-semibold text-slate-200">
@@ -170,20 +141,7 @@ function App() {
         {status === "error" && (
           <div className="text-center space-y-4">
             <div className="mx-auto w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-                />
-              </svg>
+              <AlertCircle className="w-6 h-6" />
             </div>
             <div className="space-y-1 px-4">
               <h3 className="text-sm font-semibold text-rose-400">
