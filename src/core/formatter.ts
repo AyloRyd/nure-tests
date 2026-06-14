@@ -13,8 +13,27 @@ export function formatQuizData(questions: Question[]): string {
   return formattedOutput;
 }
 
-export function formatForGPT(questions: Question[]): string {
-  const prompt =
-    "Answer only in the format: **{question_number}. {question_text}**\n{correct_options}, where the correct options are listed with both their text and identifier.\n---";
-  return `${prompt}\n\n${formatQuizData(questions)}`;
+export function formatForAI(questions: Question[]): string {
+  const prompt = `Solve the quiz questions provided in the JSON array below.
+Return a valid JSON object where:
+- Keys are the exact question text.
+- Values are JSON arrays containing the correct answers.
+- For SingleAnswer, MultipleAnswer, and SelectAnswer: choose the correct answer text(s) from the provided options.
+- For ShortAnswer: write the correct text answer on your own (since options is empty).
+Do not include any extra text, markdown formatting (other than a json code block), or explanations.
+
+Example output:
+{
+  "Question text here?": ["Correct Option text"]
+}
+
+Questions to solve:`;
+
+  const inputData = questions.map((q) => ({
+    question: q.text,
+    type: q.type,
+    options: q.answers,
+  }));
+
+  return `${prompt}\n\`\`\`json\n${JSON.stringify(inputData, null, 2)}\n\`\`\``;
 }

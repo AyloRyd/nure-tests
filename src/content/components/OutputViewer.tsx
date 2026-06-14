@@ -3,8 +3,8 @@ import type { Question } from "../../types";
 
 interface OutputViewerProps {
   questions: Question[];
-  outputFormat: "standard" | "gpt";
-  onChangeFormat: (format: "standard" | "gpt") => void;
+  outputFormat: "standard" | "ai";
+  onChangeFormat: (format: "standard" | "ai") => void;
   outputText: string;
 }
 
@@ -38,15 +38,15 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
             Standard
           </button>
           <button
-            onClick={() => onChangeFormat("gpt")}
+            onClick={() => onChangeFormat("ai")}
             className={`text-[10px] px-2 py-0.5 rounded-lg transition cursor-pointer ${
-              outputFormat === "gpt"
+              outputFormat === "ai"
                 ? "bg-indigo-600/20 text-indigo-400 font-semibold"
                 : "bg-transparent text-slate-400 hover:text-slate-200"
             }`}
             style={{
               border:
-                outputFormat === "gpt"
+                outputFormat === "ai"
                   ? "1px solid rgba(99, 102, 241, 0.3)"
                   : "none",
             }}

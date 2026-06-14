@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import type { Question } from "../../types";
 import { useScraper } from "../hooks/useScraper";
-import { formatQuizData, formatForGPT } from "../../core/formatter";
+import { formatQuizData, formatForAI } from "../../core/formatter";
 import { OverlayHeader } from "./OverlayHeader";
 import { LogsTerminal } from "./LogsTerminal";
 import { OutputViewer } from "./OutputViewer";
@@ -24,15 +24,15 @@ export const Overlay: React.FC<OverlayProps> = ({
     hasConfirmedWarning && hasQuestionsOnPage,
     onScrapeFinish,
   );
-  const [outputFormat, setOutputFormat] = useState<"standard" | "gpt">(
+  const [outputFormat, setOutputFormat] = useState<"standard" | "ai">(
     "standard",
   );
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const getOutputText = () => {
-    if (outputFormat === "gpt") {
-      return formatForGPT(questions);
+    if (outputFormat === "ai") {
+      return formatForAI(questions);
     }
     return formatQuizData(questions);
   };
