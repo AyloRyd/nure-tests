@@ -15,41 +15,29 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
   outputText,
 }) => {
   return (
-    <div className="flex-1 flex flex-col min-h-0 mt-3">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+    <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex items-center justify-between mb-3 shrink-0 select-none">
+        <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold px-1">
           Parsed Output ({questions.length} questions)
         </span>
-        <div className="flex gap-1.5">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => onChangeFormat("standard")}
-            className={`text-[10px] px-2 py-0.5 rounded-lg transition cursor-pointer ${
+            className={`text-[11px] px-3 py-1 rounded-lg transition cursor-pointer select-none font-bold ${
               outputFormat === "standard"
-                ? "bg-indigo-600/20 text-indigo-400 font-semibold"
-                : "bg-transparent text-slate-400 hover:text-slate-200"
+                ? "bg-indigo-600/20 text-indigo-300 border border-indigo-500/30"
+                : "bg-slate-950/40 text-slate-400 border border-slate-800/60 hover:text-slate-200"
             }`}
-            style={{
-              border:
-                outputFormat === "standard"
-                  ? "1px solid rgba(99, 102, 241, 0.3)"
-                  : "none",
-            }}
           >
             Standard
           </button>
           <button
             onClick={() => onChangeFormat("ai")}
-            className={`text-[10px] px-2 py-0.5 rounded-lg transition cursor-pointer ${
+            className={`text-[11px] px-3 py-1 rounded-lg transition cursor-pointer select-none font-bold ${
               outputFormat === "ai"
-                ? "bg-indigo-600/20 text-indigo-400 font-semibold"
-                : "bg-transparent text-slate-400 hover:text-slate-200"
+                ? "bg-indigo-600/20 text-indigo-300 border border-indigo-500/30"
+                : "bg-slate-950/40 text-slate-400 border border-slate-800/60 hover:text-slate-200"
             }`}
-            style={{
-              border:
-                outputFormat === "ai"
-                  ? "1px solid rgba(99, 102, 241, 0.3)"
-                  : "none",
-            }}
           >
             AI Prompt
           </button>
@@ -59,7 +47,7 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
       <textarea
         readOnly
         value={outputText}
-        className="flex-1 w-full bg-slate-950/70 rounded-lg p-3 font-mono text-[10px] text-slate-300 resize-none focus:outline-none"
+        className="flex-1 w-full bg-[#0a1024] border border-slate-800/80 rounded-lg p-3 font-mono text-[10px] text-slate-300 resize-none focus:outline-none"
       />
     </div>
   );

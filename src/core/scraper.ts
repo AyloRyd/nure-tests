@@ -1,6 +1,8 @@
 import type { Question } from "../types";
 import { parseQuestionBlock } from "./parser";
 
+declare const __DEV__: boolean;
+
 export function getBaseUrlAndParams(currentUrl: string): {
   baseUrl: string;
   params: Record<string, string>;
@@ -67,6 +69,16 @@ export async function runScraper(
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const html = await response.text();
+
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        fetch("http://localhost:3001/api/save-page", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pageNum: pageNum + 1, html, url: pageUrl }),
+        }).catch((err) => {
+          console.warn("[Dev Mode] Failed to save page to dev-server:", err);
+        });
+      }
       const parser = new DOMParser();
       const pageDoc = parser.parseFromString(html, "text/html");
 

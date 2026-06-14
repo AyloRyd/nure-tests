@@ -26,13 +26,14 @@ function App() {
       });
 
       const url = activeTab.url || "";
-      const isMoodleQuiz = url.includes("dl.nure.ua/mod/quiz");
+      const isMoodleQuiz =
+        url.includes("dl.nure.ua/mod/quiz") ||
+        (url.includes("localhost") && url.includes("/mod/quiz")) ||
+        (url.includes("127.0.0.1") && url.includes("/mod/quiz"));
 
       if (!isMoodleQuiz) {
         setStatus("error");
-        setErrorMsg(
-          "This page does not seem to be a dl.nure.ua Moodle quiz page.",
-        );
+        setErrorMsg("This page does not seem to be a Moodle quiz page.");
         return;
       }
 

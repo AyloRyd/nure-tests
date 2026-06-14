@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Parses questions on dl.nure.ua Moodle test pages",
   "permissions": ["activeTab", "storage"],
-  "host_permissions": ["*://dl.nure.ua/*"],
+  "host_permissions": ["*://dl.nure.ua/*", "*://localhost/*"],
   "action": {
     "default_popup": "index.html",
     "default_title": "NURETests",
@@ -17,7 +17,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://dl.nure.ua/mod/quiz/*"],
+      "matches": ["*://dl.nure.ua/mod/quiz/*", "*://localhost/mod/quiz/*"],
       "js": ["assets/content.js"],
       "run_at": "document_idle"
     }
@@ -25,7 +25,7 @@
   "web_accessible_resources": [
     {
       "resources": ["assets/*"],
-      "matches": ["*://dl.nure.ua/*"]
+      "matches": ["*://dl.nure.ua/*", "*://localhost/*"]
     }
   ]
 }

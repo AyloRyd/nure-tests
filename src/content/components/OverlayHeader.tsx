@@ -6,6 +6,8 @@ interface OverlayHeaderProps {
   onClose: () => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  uiPosition: "left" | "right";
+  onTogglePosition: () => void;
 }
 
 export const OverlayHeader: React.FC<OverlayHeaderProps> = ({
@@ -13,6 +15,8 @@ export const OverlayHeader: React.FC<OverlayHeaderProps> = ({
   onClose,
   isCollapsed,
   onToggleCollapse,
+  uiPosition,
+  onTogglePosition,
 }) => {
   return (
     <header className="px-4 py-3 bg-slate-950/80 flex justify-between items-center select-none shrink-0">
@@ -34,33 +38,58 @@ export const OverlayHeader: React.FC<OverlayHeaderProps> = ({
       </div>
       <div className="flex items-center gap-2">
         <button
+          onClick={onTogglePosition}
+          className="text-slate-400 hover:text-slate-200 transition cursor-pointer w-7 h-7 flex items-center justify-center hover:bg-slate-800 rounded-lg"
+          title={`Dock to ${uiPosition === "right" ? "left" : "right"}`}
+        >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            {uiPosition === "right" ? (
+              <line x1="9" y1="3" x2="9" y2="21" />
+            ) : (
+              <line x1="15" y1="3" x2="15" y2="21" />
+            )}
+          </svg>
+        </button>
+        <button
           onClick={onToggleCollapse}
           className="text-slate-400 hover:text-slate-200 transition cursor-pointer w-7 h-7 flex items-center justify-center hover:bg-slate-800 rounded-lg"
           title={isCollapsed ? "Restore window" : "Minimize window"}
         >
           {isCollapsed ? (
             <svg
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.5"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <rect x="3" y="3" width="8" height="8" rx="1" />
-              <path d="M3 9V2.5A1.5 1.5 0 0 1 4.5 1H9" />
+              <rect x="3" y="3" width="18" height="18" rx="2" />
             </svg>
           ) : (
             <svg
-              width="12"
-              height="2"
-              viewBox="0 0 12 2"
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="2.5"
               strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <line x1="0" y1="1" x2="12" y2="1" />
+              <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
           )}
         </button>

@@ -19,3 +19,5 @@ export interface ScrapeProgress {
   logs: string[];
   output: string;
 }
+
+export type AiAnswers = Record<string, string[]>;

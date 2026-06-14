@@ -3,8 +3,11 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "path";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
+  define: {
+    __DEV__: mode === "development",
+  },
   build: {
     outDir: "dist",
     emptyOutDir: true,
@@ -19,4 +22,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

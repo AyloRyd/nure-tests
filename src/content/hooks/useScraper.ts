@@ -1,17 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Question, ScrapeProgress } from "../../types";
 import { runScraper } from "../../core/scraper";
 
 export function useScraper(
   enabled: boolean,
   onScrapeFinish?: (questions: Question[]) => void,
+  initialQuestions?: Question[],
 ) {
-  const [status, setStatus] = useState<ScrapeProgress["status"]>("idle");
+  const [status, setStatus] = useState<ScrapeProgress["status"]>(
+    initialQuestions && initialQuestions.length > 0 ? "completed" : "idle",
+  );
   const [logs, setLogs] = useState<string[]>([]);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<Question[]>(
+    initialQuestions || [],
+  );
+  const hasStarted = useRef(initialQuestions && initialQuestions.length > 0);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || hasStarted.current) return;
+    hasStarted.current = true;
 
     let active = true;
 

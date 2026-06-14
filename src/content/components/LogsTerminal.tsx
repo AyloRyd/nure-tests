@@ -15,7 +15,7 @@ export const LogsTerminal: React.FC<LogsTerminalProps> = ({ logs, status }) => {
   }, [logs]);
 
   return (
-    <div className="flex-1 bg-slate-950/50 rounded-lg p-3 font-mono text-[11px] text-slate-300 overflow-y-auto max-h-[160px] space-y-1">
+    <div className="flex-1 bg-slate-950/50 rounded-lg p-3 font-mono text-[11px] text-slate-300 overflow-y-auto space-y-1">
       {logs.map((log, i) => (
         <div key={i} className="leading-relaxed pl-2">
           {log}
