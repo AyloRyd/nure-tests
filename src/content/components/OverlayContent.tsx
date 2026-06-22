@@ -39,12 +39,13 @@ export const OverlayContent: React.FC<OverlayContentProps> = ({
 
   return (
     <>
-      {hasQuestionsOnPage && (
-        <NavigationTabs
-          activeTab={activeMainTab}
-          onChangeTab={state.setActiveMainTab}
-        />
-      )}
+      {hasQuestionsOnPage &&
+        !(activeMainTab === "parse-test" && !hasConfirmedWarning) && (
+          <NavigationTabs
+            activeTab={activeMainTab}
+            onChangeTab={state.setActiveMainTab}
+          />
+        )}
 
       <div className="flex-grow p-4 overflow-y-auto flex flex-col min-h-0">
         {!hasQuestionsOnPage ? (

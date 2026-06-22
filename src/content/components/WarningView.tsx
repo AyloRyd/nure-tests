@@ -11,7 +11,7 @@ export const WarningView: React.FC<WarningViewProps> = ({
   onConfirm,
 }) => {
   return (
-    <div className="p-1 flex flex-col gap-4 min-h-0 text-left">
+    <div className="flex-1 flex flex-col gap-4 min-h-0 text-left">
       <div className="flex items-center gap-3 text-rose-400">
         <AlertTriangle size={20} />
         <h3 className="text-sm font-bold tracking-wide text-rose-300">
@@ -44,16 +44,16 @@ export const WarningView: React.FC<WarningViewProps> = ({
         </p>
       </div>
 
-      <div className="flex gap-3 mt-2">
+      <div className="flex mt-auto -mx-4 -mb-4 border-t border-slate-900/50 h-12 overflow-hidden shrink-0">
         <button
           onClick={onClose}
-          className="flex-1 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition cursor-pointer text-center"
+          className="flex-1 h-full bg-slate-800 hover:bg-slate-700 active:bg-slate-750 text-slate-200 text-xs font-semibold transition-colors duration-150 cursor-pointer text-center select-none border-r border-slate-900/50 rounded-none"
         >
           Cancel & Close
         </button>
         <button
           onClick={onConfirm}
-          className="flex-1 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition cursor-pointer text-center"
+          className="flex-1 h-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-semibold transition-colors duration-150 cursor-pointer text-center select-none rounded-none"
         >
           Proceed
         </button>

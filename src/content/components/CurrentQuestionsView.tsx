@@ -22,7 +22,7 @@ export const CurrentQuestionsView: React.FC<CurrentQuestionsViewProps> = ({
   } = useCurrentQuestions(answers);
 
   return (
-    <div className="flex-grow flex flex-col gap-3 text-left">
+    <div className="flex-grow flex flex-col gap-3 text-left pb-4">
       <div className="flex flex-col gap-2">
         {visibleQuestions.length === 0 ? (
           <div className="p-3 bg-slate-950/20 rounded-lg border border-slate-800/40 text-center">
