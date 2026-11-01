@@ -56,6 +56,10 @@ If a quiz uses sequential navigation, Moodle won't let you go back. Scraping fet
 
 A single question mode that only parses the current page is planned.
 
+## Installing
+
+Download `nure-tests-vX.Y.Z.zip` from the [latest release](https://github.com/AyloRyd/nure-tests/releases/latest), unzip it and load the folder as described in [Loading the extension](#loading-the-extension) (pick the unzipped folder instead of `dist/`). No build needed.
+
 ## Running locally
 
 Needs [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/).
@@ -107,3 +111,15 @@ Firefox:
 | `pnpm test`   | Run the unit tests              |
 | `pnpm check`  | Lint + type-check + tests       |
 | `pnpm format` | Run prettier over the repo      |
+
+## Releasing
+
+1. Bump `version` in `public/manifest.json` and commit
+2. Tag and push:
+
+   ```bash
+   git tag v1.1.0
+   git push origin v1.1.0
+   ```
+
+The release workflow checks that the tag matches the manifest version, runs lint, type-check and tests, builds `dist/`, zips it and publishes a GitHub release with generated notes.
