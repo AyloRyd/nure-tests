@@ -62,17 +62,13 @@ Download `nure-tests-vX.Y.Z.zip` from the [latest release](https://github.com/Ay
 
 ## Running locally
 
-Needs [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/).
+Needs [Node.js](https://nodejs.org/), [pnpm](https://pnpm.io/) and [just](https://github.com/casey/just). Run `just` to see all recipes.
 
 ```bash
-pnpm install
+git clone https://github.com/AyloRyd/nure-tests.git && cd nure-tests && just setup && just dev
 ```
 
-```bash
-pnpm dev
-```
-
-`pnpm dev` rebuilds the popup and content script into `dist/` on every change, and starts a helper server on `http://localhost:3010`.
+`just dev` rebuilds the popup and content script into `dist/` on every change, and starts a helper server on `http://localhost:3010`.
 
 The helper server:
 
@@ -81,12 +77,6 @@ The helper server:
 - loads the extension straight into a mock page with the "With extension preloaded" link (`&ext=1`). It uses the current `dist/` build and a small `chrome.*` stand-in, so it works in any browser without installing the extension
 - slows mock pages down with `&delay=500` (milliseconds), handy for looking at the parsing progress
 - caches Moodle's theme CSS, fonts and images in `.pages/.cache/`. dl.nure.ua starts answering with a CAPTCHA page after many requests, and the cache keeps mock pages styled after the first load
-
-Or all at once:
-
-```bash
-git clone https://github.com/AyloRyd/nure-tests.git && cd nure-tests && pnpm install && pnpm build && pnpm dev
-```
 
 ### Loading the extension
 
@@ -102,24 +92,10 @@ Firefox:
 2. Go to "This Firefox"
 3. Click "Load Temporary Add-on" and pick `dist/manifest.json`
 
-## Scripts
-
-| Command       | What it does                    |
-| ------------- | ------------------------------- |
-| `pnpm dev`    | Watch build + helper server     |
-| `pnpm build`  | Type-check and production build |
-| `pnpm test`   | Run the unit tests              |
-| `pnpm check`  | Lint + type-check + tests       |
-| `pnpm format` | Run prettier over the repo      |
-
 ## Releasing
 
-1. Bump `version` in `public/manifest.json` and commit
-2. Tag and push:
+```bash
+just release 1.1.0
+```
 
-   ```bash
-   git tag v1.1.0
-   git push origin v1.1.0
-   ```
-
-The release workflow checks that the tag matches the manifest version, runs lint, type-check and tests, builds `dist/`, zips it and publishes a GitHub release with generated notes.
+This runs the checks, bumps `version` in `public/manifest.json`, commits, tags `v1.1.0` and pushes. The release workflow then checks that the tag matches the manifest version, runs lint, type-check and tests, builds `dist/`, zips it and publishes a GitHub release with generated notes.
