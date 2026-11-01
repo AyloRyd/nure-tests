@@ -25,8 +25,15 @@ Browser extension for Moodle quizzes on [dl.nure.ua](https://dl.nure.ua). It scr
 | Ready-made LLM prompt                                      | Pasting the LLM reply                                         |
 | ![Answers applied](docs/screenshots/05-applied.png)        | ![Searching imported answers](docs/screenshots/06-search.png) |
 | Answers applied on the page                                | Searching all imported answers                                |
-| ![Raw JSON](docs/screenshots/07-raw-json.png)              | ![Docked left](docs/screenshots/08-dock-left.png)             |
-| Raw JSON                                                   | Panel docked to the left                                      |
+| ![Raw JSON](docs/screenshots/07-raw-json.png)              |                                                               |
+| Raw JSON                                                   |                                                               |
+
+The panel docks to either side of the page or collapses to its header:
+
+|                                                     |                                                   |                                                 |
+| --------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------- |
+| ![Docked right](docs/screenshots/08-dock-right.png) | ![Docked left](docs/screenshots/09-dock-left.png) | ![Collapsed](docs/screenshots/10-collapsed.png) |
+| Docked right                                        | Docked left                                       | Collapsed                                       |
 
 ## Answers format
 
