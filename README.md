@@ -17,22 +17,22 @@ Browser extension for Moodle quizzes on [dl.nure.ua](https://dl.nure.ua). It scr
 
 ## Screenshots
 
-|                                                            |                                                               |
-| ---------------------------------------------------------- | ------------------------------------------------------------- |
-| ![Warning before parsing](docs/screenshots/01-warning.png) | ![Parsed questions](docs/screenshots/02-parsed-output.png)    |
-| Warning before parsing                                     | Parsed questions                                              |
-| ![LLM prompt](docs/screenshots/03-ai-prompt.png)           | ![Pasting the LLM reply](docs/screenshots/04-import.png)      |
-| Ready-made LLM prompt                                      | Pasting the LLM reply                                         |
-| ![Answers applied](docs/screenshots/05-applied.png)        | ![Searching imported answers](docs/screenshots/06-search.png) |
-| Answers applied on the page                                | Searching all imported answers                                |
-| ![Raw JSON](docs/screenshots/07-raw-json.png)              |                                                               |
-| Raw JSON                                                   |                                                               |
+|                                                               |                                                         |
+| ------------------------------------------------------------- | ------------------------------------------------------- |
+| ![Warning before parsing](docs/screenshots/01-warning.png)    | ![Parsing in progress](docs/screenshots/02-parsing.png) |
+| Warning before parsing                                        | Parsing in progress                                     |
+| ![Parsed questions](docs/screenshots/03-parsed-output.png)    | ![LLM prompt](docs/screenshots/04-ai-prompt.png)        |
+| Parsed questions                                              | Ready-made LLM prompt                                   |
+| ![Pasting the LLM reply](docs/screenshots/05-import.png)      | ![Answers applied](docs/screenshots/06-applied.png)     |
+| Pasting the LLM reply                                         | Answers applied on the page                             |
+| ![Searching imported answers](docs/screenshots/07-search.png) | ![Raw JSON](docs/screenshots/08-raw-json.png)           |
+| Searching all imported answers                                | Raw JSON                                                |
 
 The panel docks to either side of the page or collapses to its header:
 
 |                                                     |                                                   |                                                 |
 | --------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------- |
-| ![Docked right](docs/screenshots/08-dock-right.png) | ![Docked left](docs/screenshots/09-dock-left.png) | ![Collapsed](docs/screenshots/10-collapsed.png) |
+| ![Docked right](docs/screenshots/09-dock-right.png) | ![Docked left](docs/screenshots/10-dock-left.png) | ![Collapsed](docs/screenshots/11-collapsed.png) |
 | Docked right                                        | Docked left                                       | Collapsed                                       |
 
 ## Answers format
@@ -75,6 +75,7 @@ The helper server:
 - saves HTML snapshots of quizzes you parse on dl.nure.ua into `.pages/default/` (gitignored), named by attempt ID. Firefox may ask whether dl.nure.ua can "access other apps and services on this device". Allow it, or nothing gets saved
 - serves saved attempts back as mock quiz pages, listed on `http://localhost:3010`. Moodle's own JS is stripped, so the server adds what the mock pages need: Next/Previous and question navigation, and working drawers
 - loads the extension straight into a mock page with the "With extension preloaded" link (`&ext=1`). It uses the current `dist/` build and a small `chrome.*` stand-in, so it works in any browser without installing the extension
+- slows mock pages down with `&delay=500` (milliseconds), handy for looking at the parsing progress
 - caches Moodle's theme CSS, fonts and images in `.pages/.cache/`. dl.nure.ua starts answering with a CAPTCHA page after many requests, and the cache keeps mock pages styled after the first load
 
 Or all at once:
