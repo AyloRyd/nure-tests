@@ -48,7 +48,7 @@ export function selectAnswersForQuestion(
 ): boolean {
   let anySelected = false;
 
-  if (questionType === "SingleAnswer" || questionType === "MultipleAnswer") {
+  if (questionType === "single" || questionType === "multiple") {
     const labels = questionElement.querySelectorAll(
       '[data-region="answer-label"]',
     );
@@ -95,7 +95,7 @@ export function selectAnswersForQuestion(
         }
       }
     });
-  } else if (questionType === "ShortAnswer") {
+  } else if (questionType === "short") {
     const textInput = questionElement.querySelector(
       'input[type="text"], textarea',
     ) as HTMLInputElement | HTMLTextAreaElement | null;
@@ -110,7 +110,7 @@ export function selectAnswersForQuestion(
       triggerGlowAnimation(textInput);
       anySelected = true;
     }
-  } else if (questionType === "SelectAnswer") {
+  } else if (questionType === "select") {
     const selects = questionElement.querySelectorAll("select");
     selects.forEach((select) => {
       const options = select.querySelectorAll("option");
@@ -161,11 +161,11 @@ export function autoSelectAllVisibleQuestions(answers: AiAnswers): number {
       const textInputs = block.querySelectorAll('input[type="text"], textarea');
       const selectElements = block.querySelectorAll("select");
 
-      let type: AnswerType = "Unknown";
-      if (radioInputs.length > 0) type = "SingleAnswer";
-      else if (checkboxInputs.length > 0) type = "MultipleAnswer";
-      else if (textInputs.length > 0) type = "ShortAnswer";
-      else if (selectElements.length > 0) type = "SelectAnswer";
+      let type: AnswerType = "unknown";
+      if (radioInputs.length > 0) type = "single";
+      else if (checkboxInputs.length > 0) type = "multiple";
+      else if (textInputs.length > 0) type = "short";
+      else if (selectElements.length > 0) type = "select";
 
       const success = selectAnswersForQuestion(block, correctAnswers, type);
       if (success) {

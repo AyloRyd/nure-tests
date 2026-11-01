@@ -36,11 +36,11 @@ export function useCurrentQuestions(answers: AiAnswers | null) {
           );
           const selectElements = block.querySelectorAll("select");
 
-          let type: AnswerType = "Unknown";
-          if (radioInputs.length > 0) type = "SingleAnswer";
-          else if (checkboxInputs.length > 0) type = "MultipleAnswer";
-          else if (textInputs.length > 0) type = "ShortAnswer";
-          else if (selectElements.length > 0) type = "SelectAnswer";
+          let type: AnswerType = "unknown";
+          if (radioInputs.length > 0) type = "single";
+          else if (checkboxInputs.length > 0) type = "multiple";
+          else if (textInputs.length > 0) type = "short";
+          else if (selectElements.length > 0) type = "select";
 
           list.push({
             element: block,
@@ -89,13 +89,13 @@ export function useCurrentQuestions(answers: AiAnswers | null) {
 
   const formatType = useCallback((type: AnswerType): string => {
     switch (type) {
-      case "SingleAnswer":
+      case "single":
         return "Single Choice";
-      case "MultipleAnswer":
+      case "multiple":
         return "Multiple Choice";
-      case "ShortAnswer":
+      case "short":
         return "Written Answer";
-      case "SelectAnswer":
+      case "select":
         return "Dropdown Select";
       default:
         return "Question";

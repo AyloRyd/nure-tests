@@ -28,15 +28,15 @@ export function getAnswersType(container: Element): AnswerType {
   const selectElements = base.querySelectorAll("select");
 
   if (radioInputs.length > 0) {
-    return "SingleAnswer";
+    return "single";
   } else if (checkboxInputs.length > 0) {
-    return "MultipleAnswer";
+    return "multiple";
   } else if (textInputs.length > 0) {
-    return "ShortAnswer";
+    return "short";
   } else if (selectElements.length > 0) {
-    return "SelectAnswer";
+    return "select";
   } else {
-    return "Unknown";
+    return "unknown";
   }
 }
 

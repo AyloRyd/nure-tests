@@ -1,9 +1,9 @@
 export type AnswerType =
-  | "SingleAnswer"
-  | "MultipleAnswer"
-  | "ShortAnswer"
-  | "SelectAnswer"
-  | "Unknown";
+  | "single"
+  | "multiple"
+  | "short"
+  | "select"
+  | "unknown";
 
 export interface Question {
   index: number;

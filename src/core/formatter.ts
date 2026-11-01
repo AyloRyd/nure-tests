@@ -18,8 +18,8 @@ export function formatForAI(questions: Question[]): string {
 Return a valid JSON object where:
 - Keys are the exact question text.
 - Values are JSON arrays containing the correct answers.
-- For SingleAnswer, MultipleAnswer, and SelectAnswer: choose the correct answer text(s) from the provided options.
-- For ShortAnswer: write the correct text answer on your own (since options is empty).
+- For single, multiple, and select: choose the correct answer text(s) from the provided options.
+- For short: write the correct text answer on your own (since options is empty).
 Do not include any extra text, markdown formatting (other than a json code block), or explanations.
 
 Example output:

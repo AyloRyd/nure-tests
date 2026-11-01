@@ -83,7 +83,7 @@ export const CurrentQuestionsView: React.FC<CurrentQuestionsViewProps> = ({
                         <span className="text-slate-400 font-normal">
                           Answer:{" "}
                         </span>
-                        {q.type === "ShortAnswer"
+                        {q.type === "short"
                           ? `"${correctList[0]}"`
                           : correctList.join(", ")}
                       </div>
