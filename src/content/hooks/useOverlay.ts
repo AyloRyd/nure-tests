@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useStore } from "../store/useStore";
 import { useScraper } from "./useScraper";
 import { formatQuizData, formatForAI } from "../../core/formatter";
@@ -29,15 +30,16 @@ export function useOverlay() {
     setCopyFeedback,
     setQuestions,
     resetAnswers,
-  } = useStore();
+  } = useStore(useShallow((s) => s));
 
   const hasQuestionsOnPage =
     document.querySelectorAll(".qnbutton, .que").length > 0;
   const activeQuestionsCount = document.querySelectorAll(".que").length;
 
   useEffect(() => {
+    // Runs on every page load, so never overwrite what the user picked by hand
     if (aiAnswers && autoSelect) {
-      autoSelectAllVisibleQuestions(aiAnswers);
+      autoSelectAllVisibleQuestions(aiAnswers, { onlyUnanswered: true });
     }
   }, [aiAnswers, autoSelect]);
 
@@ -52,6 +54,7 @@ export function useOverlay() {
     status,
     logs,
     questions: scrapedQuestions,
+    failedPages,
     reset: resetScraper,
   } = useScraper(
     hasConfirmedWarning && hasQuestionsOnPage,
@@ -133,6 +136,7 @@ export function useOverlay() {
     questions: scrapedQuestions,
     status,
     logs,
+    failedPages,
     hasQuestionsOnPage,
     activeQuestionsCount,
     shouldExpand,

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import type { AiAnswers } from "../../types";
 import { autoSelectAllVisibleQuestions } from "../utils/AnswerSelector";
+import { parseAnswersJson } from "../../core/formatter";
 
 interface AnswersImporterProps {
   onAnswersImport: (answers: AiAnswers) => void;
@@ -23,28 +24,7 @@ export const AnswersImporter: React.FC<AnswersImporterProps> = ({
     }
 
     try {
-      const parsed = JSON.parse(jsonInput);
-
-      if (
-        typeof parsed !== "object" ||
-        parsed === null ||
-        Array.isArray(parsed)
-      ) {
-        throw new Error(
-          "Answers must be a JSON object mapping questions to answers.",
-        );
-      }
-
-      const answers: AiAnswers = {};
-      Object.entries(parsed).forEach(([key, val]) => {
-        if (!Array.isArray(val)) {
-          throw new Error(
-            `Value for question "${key.substring(0, 20)}..." must be an array of strings.`,
-          );
-        }
-        answers[key] = val.map(String);
-      });
-
+      const answers: AiAnswers = parseAnswersJson(jsonInput);
       onAnswersImport(answers);
 
       const matched = autoSelectAllVisibleQuestions(answers);
@@ -62,9 +42,10 @@ export const AnswersImporter: React.FC<AnswersImporterProps> = ({
           Import AI JSON Answers
         </h3>
         <p className="text-[11px] text-slate-400 leading-relaxed">
-          Paste the JSON response obtained from the AI. The parser will
-          automatically map the answers to the questions currently on your
-          screen, select them, and highlight them with a brief glow.
+          Paste the JSON response obtained from the AI (code fences and text
+          around it are fine). The parser will automatically map the answers to
+          the questions currently on your screen, select them, and highlight
+          them with a brief glow.
         </p>
       </div>
 

@@ -1,78 +1,97 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import type { AnswerType, AiAnswers } from "../../types";
-import { cleanQuestionText } from "../../core/parser";
-import { selectAnswersForQuestion } from "../utils/AnswerSelector";
+import { getAnswersType, normalizeForMatch } from "../../core/parser";
+import {
+  createAnswerLookup,
+  getQuestionBlockText,
+  selectAnswersForQuestion,
+} from "../utils/AnswerSelector";
 
 interface VisibleQuestion {
+  key: string;
+  element: Element;
+  text: string;
+  type: AnswerType;
+  index: number;
+  correctList: string[] | null;
+}
+
+interface ScannedQuestion {
+  key: string;
   element: Element;
   text: string;
   type: AnswerType;
   index: number;
 }
 
-export function useCurrentQuestions(answers: AiAnswers | null) {
-  const [visibleQuestions, setVisibleQuestions] = useState<VisibleQuestion[]>(
-    [],
+function scanVisibleQuestions(): ScannedQuestion[] {
+  const list: ScannedQuestion[] = [];
+  document.querySelectorAll(".que").forEach((block, idx) => {
+    const text = getQuestionBlockText(block);
+    if (text === null) return;
+    const qno = block.querySelector(".qno")?.textContent?.trim();
+    list.push({
+      key: block.id || `${idx}:${text}`,
+      element: block,
+      text,
+      type: getAnswersType(block),
+      index: qno && /^\d+$/.test(qno) ? Number(qno) : idx + 1,
+    });
+  });
+  return list;
+}
+
+function sameQuestions(a: ScannedQuestion[], b: ScannedQuestion[]): boolean {
+  return (
+    a.length === b.length &&
+    a.every((q, i) => q.element === b[i].element && q.text === b[i].text)
   );
+}
+
+export function useCurrentQuestions(answers: AiAnswers | null) {
+  const [scanned, setScanned] =
+    useState<ScannedQuestion[]>(scanVisibleQuestions);
   const [searchQuery, setSearchQuery] = useState("");
   const [appliedSet, setAppliedSet] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    const scanVisibleQuestions = () => {
-      const blocks = document.querySelectorAll(".que");
-      const list: VisibleQuestion[] = [];
-
-      blocks.forEach((block, idx) => {
-        const qtextEl = block.querySelector(".qtext");
-        if (qtextEl) {
-          const text = cleanQuestionText(qtextEl.textContent || "");
-
-          const radioInputs = block.querySelectorAll('input[type="radio"]');
-          const checkboxInputs = block.querySelectorAll(
-            'input[type="checkbox"]',
-          );
-          const textInputs = block.querySelectorAll(
-            'input[type="text"], textarea',
-          );
-          const selectElements = block.querySelectorAll("select");
-
-          let type: AnswerType = "unknown";
-          if (radioInputs.length > 0) type = "single";
-          else if (checkboxInputs.length > 0) type = "multiple";
-          else if (textInputs.length > 0) type = "short";
-          else if (selectElements.length > 0) type = "select";
-
-          list.push({
-            element: block,
-            text,
-            type,
-            index: idx + 1,
-          });
-        }
+    let frame = 0;
+    const rescan = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const next = scanVisibleQuestions();
+        // Moodle's timer mutates the DOM every second; skip no-op updates
+        setScanned((prev) => (sameQuestions(prev, next) ? prev : next));
       });
-
-      setVisibleQuestions(list);
     };
 
-    scanVisibleQuestions();
+    const target = document.getElementById("responseform") ?? document.body;
+    const observer = new MutationObserver(rescan);
+    observer.observe(target, { childList: true, subtree: true });
 
-    const observer = new MutationObserver(scanVisibleQuestions);
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, []);
 
-  const visibleMap = useMemo(() => {
-    const map = new Map<string, VisibleQuestion>();
-    visibleQuestions.forEach((q) => {
-      map.set(q.text, q);
-    });
-    return map;
-  }, [visibleQuestions]);
+  const lookup = useMemo(
+    () => (answers ? createAnswerLookup(answers) : null),
+    [answers],
+  );
+
+  const visibleQuestions: VisibleQuestion[] = useMemo(
+    () =>
+      scanned.map((q) => ({
+        ...q,
+        correctList: lookup?.(q.text) ?? null,
+      })),
+    [scanned, lookup],
+  );
 
   const handleApplyGlow = useCallback(
     (
-      questionText: string,
+      key: string,
       element: Element,
       correctList: string[],
       type: AnswerType,
@@ -80,37 +99,23 @@ export function useCurrentQuestions(answers: AiAnswers | null) {
       selectAnswersForQuestion(element, correctList, type);
       setAppliedSet((prev) => {
         const next = new Set(prev);
-        next.add(questionText);
+        next.add(key);
         return next;
       });
     },
     [],
   );
 
-  const formatType = useCallback((type: AnswerType): string => {
-    switch (type) {
-      case "single":
-        return "Single Choice";
-      case "multiple":
-        return "Multiple Choice";
-      case "short":
-        return "Written Answer";
-      case "select":
-        return "Dropdown Select";
-      default:
-        return "Question";
-    }
-  }, []);
-
   const allImportedQuestions = useMemo(() => {
     if (!answers) return [];
+    const onPage = new Set(scanned.map((q) => normalizeForMatch(q.text)));
     return Object.keys(answers)
-      .filter((text) => !visibleMap.has(text))
+      .filter((text) => !onPage.has(normalizeForMatch(text)))
       .map((text) => ({
         text,
         correctList: answers[text],
       }));
-  }, [answers, visibleMap]);
+  }, [answers, scanned]);
 
   const filteredImportedQuestions = useMemo(() => {
     if (!searchQuery.trim()) return allImportedQuestions;
@@ -130,6 +135,20 @@ export function useCurrentQuestions(answers: AiAnswers | null) {
     filteredImportedQuestions,
     allImportedQuestions,
     handleApplyGlow,
-    formatType,
   };
+}
+
+export function formatType(type: AnswerType): string {
+  switch (type) {
+    case "single":
+      return "Single Choice";
+    case "multiple":
+      return "Multiple Choice";
+    case "short":
+      return "Written Answer";
+    case "select":
+      return "Dropdown Select";
+    default:
+      return "Unsupported";
+  }
 }

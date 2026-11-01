@@ -1,6 +1,6 @@
 import React from "react";
 import type { AiAnswers } from "../../types";
-import { useCurrentQuestions } from "../hooks/useCurrentQuestions";
+import { useCurrentQuestions, formatType } from "../hooks/useCurrentQuestions";
 import { Search } from "lucide-react";
 
 interface CurrentQuestionsViewProps {
@@ -18,7 +18,6 @@ export const CurrentQuestionsView: React.FC<CurrentQuestionsViewProps> = ({
     filteredImportedQuestions,
     allImportedQuestions,
     handleApplyGlow,
-    formatType,
   } = useCurrentQuestions(answers);
 
   return (
@@ -34,12 +33,12 @@ export const CurrentQuestionsView: React.FC<CurrentQuestionsViewProps> = ({
         ) : (
           <div className="flex flex-col gap-2">
             {visibleQuestions.map((q) => {
-              const correctList = answers ? answers[q.text] : null;
-              const wasApplied = appliedSet.has(q.text);
+              const { correctList } = q;
+              const wasApplied = appliedSet.has(q.key);
 
               return (
                 <div
-                  key={q.text}
+                  key={q.key}
                   className="bg-[#0a1024] border border-slate-800/80 rounded-lg p-3 flex flex-col gap-2 transition-all duration-200"
                 >
                   <div className="flex items-center justify-between gap-2 shrink-0 select-none">
@@ -52,15 +51,10 @@ export const CurrentQuestionsView: React.FC<CurrentQuestionsViewProps> = ({
                       </span>
                     </div>
 
-                    {correctList && (
+                    {correctList && q.type !== "unknown" && (
                       <button
                         onClick={() =>
-                          handleApplyGlow(
-                            q.text,
-                            q.element,
-                            correctList,
-                            q.type,
-                          )
+                          handleApplyGlow(q.key, q.element, correctList, q.type)
                         }
                         className={`text-[9px] px-2 py-1 rounded-lg font-bold transition-all duration-150 active:scale-95 cursor-pointer ${
                           wasApplied
@@ -132,7 +126,7 @@ export const CurrentQuestionsView: React.FC<CurrentQuestionsViewProps> = ({
               filteredImportedQuestions.map((item, idx) => {
                 return (
                   <div
-                    key={idx}
+                    key={item.text}
                     className="bg-[#0a1024] border border-slate-800/80 rounded-lg p-3 flex flex-col gap-2 transition-all duration-200"
                   >
                     <div className="flex items-center justify-between gap-2 shrink-0 select-none">
