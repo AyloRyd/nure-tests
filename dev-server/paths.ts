@@ -1,6 +1,6 @@
 import path from "path";
 
-export const ROOT_DIR = path.resolve(import.meta.dirname, "../..");
+export const ROOT_DIR = path.resolve(import.meta.dirname, "..");
 export const PAGES_DIR = path.join(ROOT_DIR, ".pages");
 export const DEFAULT_DIR = path.join(PAGES_DIR, "default");
 export const DIST_DIR = path.join(ROOT_DIR, "dist");
