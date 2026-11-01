@@ -3,89 +3,72 @@
 > [!NOTE]
 > The original small bookmarklet script for parsing quizzes was written by [@SALOway](https://github.com/SALOway).
 
-A powerful browser extension designed to parse and import answers for quizzes on Moodle-based LMS sites (specifically configured for NURE's `dl.nure.ua`). It features dynamic test scraping, AI answer mapping, auto-selection, and a modern collapsible overlay interface.
+Browser extension for Moodle quizzes on [dl.nure.ua](https://dl.nure.ua). It scrapes the questions, builds a prompt you can paste into an LLM, takes the JSON answers back and ticks them on the page for you.
 
----
+## What it does
 
-## Features
+- **Parse** – walks through every page of the attempt in the background and collects the questions. Output is either plain text or a ready-made LLM prompt, copied to clipboard in one click
+- **Import** – paste the JSON the LLM gave back
+- **Auto-apply** – matches imported answers to the questions on the current page and selects them. Works with single choice, multiple choice, dropdowns and short text answers. Applied fields glow for a moment so you can see what changed
+- **Overlay** – panel docks to the left or right edge, or collapses out of the way
+- **Persistence** – active tab, panel side, imported answers and the auto-apply toggle survive a page reload
 
-- **Parse Test**: Scrapes quiz questions automatically. It fetches all pages in the background and reformats the output into structured text or AI-optimized prompts (copied to clipboard with a single click).
-- **Import AI Answers**: Allows pasting AI-generated JSON answers directly into the extension.
-- **Auto-Apply Answers**: Automatically scans the page, matches questions to the imported answers, and instantly selects the correct options (supports multiple-choice, single-choice, dropdowns, and text/short-answer inputs).
-- **Visual Glow Effect**: Highlights successfully auto-applied elements on the Moodle page with a temporary glowing animation.
-- **Collapsible UI**: Dock the panel to either the left or right side of your screen, or collapse/minimize it to stay out of the way.
-- **Session Persistence**: Restores your active tab, panel position, imported answers, and auto-apply toggle state automatically after reloading the page.
+## Answers format
 
----
+The generated prompt asks for a JSON object where keys are the exact question text and values are arrays of correct answers:
 
-## Sequential Quiz Protection
+```json
+{
+  "What is 2 + 2?": ["4"],
+  "Pick the prime numbers": ["2", "3", "5"]
+}
+```
 
-When sequential navigation is enabled in a Moodle quiz, navigating back to previous questions is disabled. Scraping all questions at once by fetching subsequent pages in the background would advance your quiz attempt, locking you out of the current page and leaving previous questions ungraded.
+## Sequential quizzes
 
-To prevent accidental lockout:
+If a quiz uses sequential navigation, Moodle won't let you go back. Scraping fetches the following pages, which moves the attempt forward and leaves earlier questions unanswered. The extension warns you before scraping, but read the warning.
 
-- The extension displays a prominent warning prompt before initiating a scrape, ensuring you are aware of the risks on sequential navigation quizzes.
-- **Future Roadmap**: We plan to implement a safe **Single Question Mode** that only parses the currently active question on the screen, allowing you to safely parse sequential quizzes page-by-page.
+A single question mode that only parses the current page is planned.
 
----
+## Running locally
 
-## How to Run Locally
-
-To run the extension in your browser, it must first be compiled into the `dist/` directory. You can do this in watch mode for development (which automatically recompiles on changes) or run a one-time production build.
-
-### 1. Install Dependencies
-
-Make sure you have [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/) installed, then run:
+Needs [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/).
 
 ```bash
 pnpm install
 ```
 
-### 2. Start the Development Server
-
-Run the dev server to start building popup/content scripts in watch mode and launch a local helper server for logging parsed pages:
-
 ```bash
 pnpm dev
 ```
 
-This script:
+`pnpm dev` rebuilds the popup and content script into `dist/` on every change, and starts a helper server on `http://localhost:3010`. The server saves HTML snapshots of parsed quizzes into `.pages/` (gitignored) and serves them back as mock quiz pages, so you can test without a live attempt.
 
-- Compiles components, content scripts, and styles into the `dist/` directory, rebuilding automatically on change.
-- Launches a local Node.js helper server on `http://localhost:3010` that automatically saves captured HTML snapshots of parsed quizzes into a gitignored `.pages/` folder for offline testing.
-
-### 3. Load the Extension into Your Browser
-
-#### Google Chrome / Chromium-based browsers:
-
-1. Open Chrome and navigate to `chrome://extensions/`.
-2. Toggle **Developer mode** on in the top-right corner.
-3. Click **Load unpacked** in the top-left corner.
-4. Select the `dist/` directory from this project's root folder.
-
-#### Mozilla Firefox:
-
-1. Open Firefox and navigate to `about:debugging`.
-2. Click **This Firefox** in the sidebar.
-3. Click **Load Temporary Add-on...** under Temporary Extensions.
-4. Select the `manifest.json` file inside the compiled `dist/` folder.
-
-### Quick Start (One-Liner)
-
-To clone the repository, install dependencies, build the extension, and start the development server in watch mode all in one command, run:
+Or all at once:
 
 ```bash
 git clone https://github.com/AyloRyd/nure-tests.git && cd nure-tests && pnpm install && pnpm build && pnpm dev
 ```
 
----
+### Loading the extension
 
-## Build for Production
+Chrome / Chromium:
 
-To perform static type-checking and build optimized, minified production assets, run:
+1. Open `chrome://extensions/`
+2. Turn on developer mode
+3. Click "Load unpacked" and pick `dist/`
 
-```bash
-pnpm build
-```
+Firefox:
 
-The production bundles will be compiled and structured inside the `dist/` directory, ready to be packaged.
+1. Open `about:debugging`
+2. Go to "This Firefox"
+3. Click "Load Temporary Add-on" and pick `dist/manifest.json`
+
+## Scripts
+
+| Command       | What it does                    |
+| ------------- | ------------------------------- |
+| `pnpm dev`    | Watch build + helper server     |
+| `pnpm build`  | Type-check and production build |
+| `pnpm check`  | Lint + type-check               |
+| `pnpm format` | Run prettier over the repo      |
