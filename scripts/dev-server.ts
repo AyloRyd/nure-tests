@@ -320,7 +320,7 @@ const EXTENSION_HARNESS = `
 // Keep track of the active folder by Moodle attempt ID to support folder-specific offline mock tests
 const activeFolderMap = new Map();
 
-const server = http.createServer((req, res) => {
+function handleRequest(req: IncomingMessage, res: ServerResponse) {
   // Set CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -558,6 +558,18 @@ const server = http.createServer((req, res) => {
 
   // 5. Proxy all other Moodle requests (stylesheets, scripts, images, etc.)
   proxyToMoodle(req, res);
+}
+
+// `&delay=ms` on a mock page slows down it and every page the scraper fetches
+// from it, which helps to see loading states
+const server = http.createServer((req, res) => {
+  const url = new URL(req.url ?? "/", "http://localhost");
+  const delay = Math.min(Number(url.searchParams.get("delay")) || 0, 5000);
+  if (delay > 0 && url.pathname === "/mod/quiz/attempt.php") {
+    setTimeout(() => handleRequest(req, res), delay);
+  } else {
+    handleRequest(req, res);
+  }
 });
 
 server.listen(3010, "localhost", () => {
