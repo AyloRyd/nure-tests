@@ -30,8 +30,39 @@ export function generatePageUrl(
 }
 
 export function getTotalQuestionsCount(doc: Document): number {
-  const questionButtons = doc.querySelectorAll(".qnbutton");
-  return questionButtons.length;
+  return doc.querySelectorAll(".qnbutton").length;
+}
+
+/**
+ * Zero-based page numbers of the attempt, read from the quiz navigation.
+ * A page can hold several questions, so this is not the question count.
+ */
+export function getPageNumbers(doc: Document): number[] {
+  const pages = new Set<number>();
+
+  doc.querySelectorAll<HTMLElement>(".qnbutton").forEach((button) => {
+    const fromData = button.dataset.quizPage;
+    if (fromData !== undefined && /^\d+$/.test(fromData)) {
+      pages.add(Number(fromData));
+      return;
+    }
+    const href = button.getAttribute("href");
+    if (href) {
+      const page = new URL(href, "http://x").searchParams.get("page");
+      pages.add(page !== null && /^\d+$/.test(page) ? Number(page) : 0);
+    }
+  });
+
+  if (pages.size === 0) pages.add(0);
+  return Array.from(pages).sort((a, b) => a - b);
+}
+
+/** True when Moodle answered with a login page instead of the attempt. */
+export function isLoginPage(doc: Document): boolean {
+  return (
+    doc.querySelector("#login, form[action*='login/index.php']") !== null ||
+    doc.body?.id === "page-login-index"
+  );
 }
 
 export interface ScraperCallbacks {
@@ -40,37 +71,48 @@ export interface ScraperCallbacks {
   onError?: (page: number, error: string) => void;
 }
 
+export interface ScrapeResult {
+  questions: Question[];
+  failedPages: number[];
+  totalPages: number;
+}
+
 export async function runScraper(
   currentUrl: string,
   doc: Document,
   callbacks?: ScraperCallbacks,
-): Promise<Question[]> {
+): Promise<ScrapeResult> {
   const { baseUrl, params } = getBaseUrlAndParams(currentUrl);
   const totalQuestions = getTotalQuestionsCount(doc);
+  const pages = getPageNumbers(doc);
 
-  if (callbacks?.onLog) {
-    callbacks.onLog(
-      `Found ${totalQuestions} questions in total. Starting extraction...`,
-    );
-  }
+  callbacks?.onLog?.(
+    `Found ${totalQuestions} questions on ${pages.length} pages. Starting extraction...`,
+  );
 
   const quizData: Question[] = [];
-  let questionIndex = 0;
+  const failedPages: number[] = [];
+  const seen = new Set<string>();
 
-  for (let pageNum = 0; pageNum < totalQuestions; pageNum++) {
+  for (const [i, pageNum] of pages.entries()) {
     const pageUrl = generatePageUrl(baseUrl, params, pageNum);
-    if (callbacks?.onLog) {
-      callbacks.onLog(`Processing page ${pageNum + 1}/${totalQuestions}...`);
-    }
+    callbacks?.onLog?.(`Processing page ${i + 1}/${pages.length}...`);
 
     try {
-      const response = await fetch(pageUrl);
+      const response = await fetch(pageUrl, { credentials: "include" });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const html = await response.text();
+      const pageDoc = new DOMParser().parseFromString(html, "text/html");
 
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
+      if (isLoginPage(pageDoc)) {
+        throw new Error("Got the login page. Your Moodle session has expired");
+      }
+
+      // Snapshot real pages for the dev server; mock pages are snapshots already
+      const isMockPage = new URL(pageUrl).hostname === "localhost";
+      if (typeof __DEV__ !== "undefined" && __DEV__ && !isMockPage) {
         fetch("http://localhost:3010/api/save-page", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -79,33 +121,33 @@ export async function runScraper(
           console.warn("[Dev Mode] Failed to save page to dev-server:", err);
         });
       }
-      const parser = new DOMParser();
-      const pageDoc = parser.parseFromString(html, "text/html");
 
       const questionContainers = pageDoc.querySelectorAll(".que");
+      if (questionContainers.length === 0) {
+        throw new Error("No questions found on this page");
+      }
       questionContainers.forEach((container) => {
-        const question = parseQuestionBlock(container, questionIndex + 1);
-        quizData.push(question);
-        questionIndex++;
+        // Moodle clamps out-of-range pages, so never count a question twice
+        const key = container.id || container.textContent || "";
+        if (seen.has(key)) return;
+        seen.add(key);
+        quizData.push(parseQuestionBlock(container, quizData.length + 1));
       });
 
-      if (callbacks?.onProgress) {
-        callbacks.onProgress(pageNum + 1, totalQuestions);
-      }
+      callbacks?.onProgress?.(i + 1, pages.length);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
-      if (callbacks?.onLog) {
-        callbacks.onLog(`Error processing page ${pageNum + 1}: ${errMsg}`);
-      }
-      if (callbacks?.onError) {
-        callbacks.onError(pageNum + 1, errMsg);
-      }
+      failedPages.push(pageNum + 1);
+      callbacks?.onLog?.(`Error processing page ${pageNum + 1}: ${errMsg}`);
+      callbacks?.onError?.(pageNum + 1, errMsg);
     }
   }
 
-  if (callbacks?.onLog) {
-    callbacks.onLog("Quiz parsing complete!");
-  }
+  callbacks?.onLog?.(
+    failedPages.length > 0
+      ? `Parsed ${quizData.length} questions, ${failedPages.length} page(s) failed.`
+      : "Quiz parsing complete!",
+  );
 
-  return quizData;
+  return { questions: quizData, failedPages, totalPages: pages.length };
 }

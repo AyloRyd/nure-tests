@@ -7,30 +7,26 @@ export function useScraper(
   onScrapeFinish?: (questions: Question[]) => void,
   initialQuestions?: Question[],
 ) {
+  const hasInitial = !!initialQuestions && initialQuestions.length > 0;
   const [status, setStatus] = useState<ScrapeProgress["status"]>(
-    initialQuestions && initialQuestions.length > 0 ? "completed" : "idle",
+    hasInitial ? "completed" : "idle",
   );
   const [logs, setLogs] = useState<string[]>([]);
   const [questions, setQuestions] = useState<Question[]>(
     initialQuestions || [],
   );
-  const hasStarted = useRef(initialQuestions && initialQuestions.length > 0);
-
-  useEffect(() => {
-    if (initialQuestions && initialQuestions.length > 0) {
-      if (!hasStarted.current) {
-        hasStarted.current = true;
-        setStatus("completed");
-        setQuestions(initialQuestions);
-      }
-    }
-  }, [initialQuestions]);
+  const [failedPages, setFailedPages] = useState<number[]>([]);
+  const hasStarted = useRef(hasInitial);
+  // Bumped by reset() so the effect below runs again
+  const [runId, setRunId] = useState(0);
 
   const reset = () => {
     hasStarted.current = false;
     setStatus("idle");
     setLogs([]);
     setQuestions([]);
+    setFailedPages([]);
+    setRunId((id) => id + 1);
   };
 
   useEffect(() => {
@@ -38,33 +34,29 @@ export function useScraper(
     hasStarted.current = true;
 
     let active = true;
+    let done = false;
 
     const run = async () => {
       setStatus("scraping");
       try {
-        const parsedQuestions = await runScraper(
-          window.location.href,
-          document,
-          {
-            onLog: (log) => {
-              if (active) setLogs((prev) => [...prev, log]);
-            },
-            onError: (page, error) => {
-              if (active) {
-                setLogs((prev) => [...prev, `[Error Page ${page}]: ${error}`]);
-              }
-            },
+        const result = await runScraper(window.location.href, document, {
+          onLog: (log) => {
+            if (active) setLogs((prev) => [...prev, log]);
           },
-        );
+        });
 
-        if (active) {
-          setQuestions(parsedQuestions);
-          setStatus("completed");
-          if (onScrapeFinish) {
-            onScrapeFinish(parsedQuestions);
-          }
+        done = true;
+        if (!active) return;
+        setQuestions(result.questions);
+        setFailedPages(result.failedPages);
+        if (result.questions.length === 0) {
+          setStatus("error");
+          return;
         }
+        setStatus("completed");
+        onScrapeFinish?.(result.questions);
       } catch (err: unknown) {
+        done = true;
         if (active) {
           setStatus("error");
           const errMsg = err instanceof Error ? err.message : String(err);
@@ -77,13 +69,16 @@ export function useScraper(
 
     return () => {
       active = false;
+      // An interrupted scrape may start again on the next run
+      if (!done) hasStarted.current = false;
     };
-  }, [enabled, onScrapeFinish]);
+  }, [enabled, onScrapeFinish, runId]);
 
   return {
     status,
     logs,
     questions,
+    failedPages,
     reset,
   };
 }

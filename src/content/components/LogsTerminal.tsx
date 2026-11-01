@@ -4,9 +4,14 @@ import type { ScrapeProgress } from "../../types";
 interface LogsTerminalProps {
   logs: string[];
   status: ScrapeProgress["status"];
+  onRetry?: () => void;
 }
 
-export const LogsTerminal: React.FC<LogsTerminalProps> = ({ logs, status }) => {
+export const LogsTerminal: React.FC<LogsTerminalProps> = ({
+  logs,
+  status,
+  onRetry,
+}) => {
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,6 +31,14 @@ export const LogsTerminal: React.FC<LogsTerminalProps> = ({ logs, status }) => {
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping" />
           Scraping in progress...
         </div>
+      )}
+      {status === "error" && onRetry && (
+        <button
+          onClick={onRetry}
+          className="mt-2 px-3 py-1 rounded-md bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 font-sans font-bold cursor-pointer"
+        >
+          Retry
+        </button>
       )}
     </div>
   );
