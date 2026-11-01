@@ -108,7 +108,6 @@ export const useStore = create<StoreState>((set) => ({
   resetAnswers: () => {
     set({ aiAnswers: null });
     saveSession({ aiAnswers: null });
-    clearSession();
   },
 
   resetAllState: () => {
@@ -125,5 +124,7 @@ export const useStore = create<StoreState>((set) => ({
       questions: [],
     });
     clearSession();
+    // The overlay stays open after a fresh start, so it must reopen on reload too
+    saveSession({ isOpen: true });
   },
 }));

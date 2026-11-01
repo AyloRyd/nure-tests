@@ -25,6 +25,8 @@ export const OverlayContent: React.FC<OverlayContentProps> = ({
     isCollapsed,
     status,
     logs,
+    failedPages,
+    resetScraper,
     hasQuestionsOnPage,
     activeQuestionsCount,
     handleConfirmWarning,
@@ -39,13 +41,13 @@ export const OverlayContent: React.FC<OverlayContentProps> = ({
 
   return (
     <>
-      {hasQuestionsOnPage &&
-        !(activeMainTab === "parse-test" && !hasConfirmedWarning) && (
-          <NavigationTabs
-            activeTab={activeMainTab}
-            onChangeTab={state.setActiveMainTab}
-          />
-        )}
+      {/* Shown on the warning too, so answers can be imported without parsing */}
+      {hasQuestionsOnPage && (
+        <NavigationTabs
+          activeTab={activeMainTab}
+          onChangeTab={state.setActiveMainTab}
+        />
+      )}
 
       <div className="flex-grow p-4 overflow-y-auto flex flex-col min-h-0">
         {!hasQuestionsOnPage ? (
@@ -56,7 +58,26 @@ export const OverlayContent: React.FC<OverlayContentProps> = ({
           ) : (
             <div className="flex-1 flex flex-col min-h-0">
               {status !== "completed" && (
-                <LogsTerminal logs={logs} status={status} />
+                <LogsTerminal
+                  logs={logs}
+                  status={status}
+                  onRetry={resetScraper}
+                />
+              )}
+
+              {status === "completed" && failedPages.length > 0 && (
+                <div className="mb-3 p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-[10px] text-amber-300 leading-relaxed flex items-center justify-between gap-2">
+                  <span>
+                    {failedPages.length} page(s) failed to load (
+                    {failedPages.join(", ")}). Some questions are missing.
+                  </span>
+                  <button
+                    onClick={resetScraper}
+                    className="shrink-0 px-2 py-1 rounded-md bg-amber-500/20 hover:bg-amber-500/30 font-bold cursor-pointer"
+                  >
+                    Retry
+                  </button>
+                </div>
               )}
 
               {status === "completed" && (

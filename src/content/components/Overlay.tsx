@@ -1,27 +1,17 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useOverlay } from "../hooks/useOverlay";
 import { OverlayHeader } from "./OverlayHeader";
 import { OverlayContent } from "./OverlayContent";
 import { OverlayFooter } from "./OverlayFooter";
-import { loadSession } from "../../core/storage";
 import { useStore } from "../store/useStore";
 import { clearAllSelectedAnswers } from "../utils/AnswerSelector";
 
 interface OverlayProps {
   onClose: () => void;
-  onScrapeFinish: () => void;
 }
 
 export const Overlay: React.FC<OverlayProps> = ({ onClose }) => {
   const state = useOverlay();
-
-  useEffect(() => {
-    loadSession().then((session) => {
-      if (session) {
-        useStore.getState().initialize(session);
-      }
-    });
-  }, []);
 
   const resetAllState = useStore((s) => s.resetAllState);
   const handleResetAll = () => {
@@ -44,6 +34,9 @@ export const Overlay: React.FC<OverlayProps> = ({ onClose }) => {
       }`}
       style={{
         border: "1px solid #64748b",
+        // Dark scrollbars and form controls even on Moodle's light theme
+        colorScheme: "dark",
+        scrollbarColor: "#334155 transparent",
         ...(state.isCollapsed
           ? {}
           : state.shouldExpand

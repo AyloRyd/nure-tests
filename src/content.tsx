@@ -1,13 +1,18 @@
 import { createRoot } from "react-dom/client";
 import { Overlay } from "./content/components/Overlay";
 import { loadSession, saveSession } from "./core/storage";
+import type { StoredSession } from "./core/storage";
+import { useStore } from "./content/store/useStore";
 import "./content.css";
 
 let rootInstance: ReturnType<typeof createRoot> | null = null;
 let hostElement: HTMLDivElement | null = null;
 
-function mountOverlay() {
+function mountOverlay(session: StoredSession | null) {
   if (document.getElementById("nuretests-host")) return;
+
+  // Restore state before the first render so the panel doesn't flash defaults
+  useStore.getState().initialize(session);
 
   hostElement = document.createElement("div");
   hostElement.id = "nuretests-host";
@@ -37,14 +42,12 @@ function mountOverlay() {
     saveSession({ isOpen: false });
   };
 
-  rootInstance.render(
-    <Overlay onClose={handleClose} onScrapeFinish={() => {}} />,
-  );
+  rootInstance.render(<Overlay onClose={handleClose} />);
 }
 
 loadSession().then((session) => {
   if (session && session.isOpen) {
-    mountOverlay();
+    mountOverlay(session);
   }
 });
 
@@ -55,10 +58,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       return;
     }
 
-    loadSession().then(() => {
+    loadSession().then((session) => {
       try {
         saveSession({ isOpen: true });
-        mountOverlay();
+        mountOverlay(session);
         sendResponse({ success: true });
       } catch (err: unknown) {
         const errMsg = err instanceof Error ? err.message : String(err);
