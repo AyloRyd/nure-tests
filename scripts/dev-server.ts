@@ -1,4 +1,5 @@
 import http from "http";
+import type { IncomingMessage, ServerResponse } from "http";
 import https from "https";
 import fs from "fs";
 import path from "path";
@@ -19,7 +20,7 @@ if (!fs.existsSync(DEFAULT_DIR)) {
   fs.mkdirSync(DEFAULT_DIR, { recursive: true });
 }
 
-function escapeHtml(str) {
+function escapeHtml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -28,7 +29,13 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-function scanAttempts(dir, list = []) {
+interface SavedAttempt {
+  attemptId: string;
+  folder: string;
+  label: string;
+}
+
+function scanAttempts(dir: string, list: SavedAttempt[] = []): SavedAttempt[] {
   if (!fs.existsSync(dir)) return list;
   const files = fs.readdirSync(dir, { withFileTypes: true });
   for (const file of files) {
@@ -61,15 +68,23 @@ function scanAttempts(dir, list = []) {
   return list;
 }
 
-function findSavedFile(dir, pageNum, attemptId) {
+function findSavedFile(
+  dir: string,
+  pageNum: number,
+  attemptId: string,
+): string | null {
   if (!fs.existsSync(dir)) return null;
   // 1. Try matching attemptId
-  let found = search(dir, pageNum, attemptId);
+  const found = search(dir, pageNum, attemptId);
   if (found) return found;
   // 2. Fallback to just matching pageNum
   return search(dir, pageNum, null);
 
-  function search(currentDir, pNum, attId) {
+  function search(
+    currentDir: string,
+    pNum: number,
+    attId: string | null,
+  ): string | null {
     const files = fs.readdirSync(currentDir, { withFileTypes: true });
     for (const file of files) {
       const fullPath = path.join(currentDir, file.name);
@@ -96,13 +111,13 @@ function findSavedFile(dir, pageNum, attemptId) {
 // answering with a CAPTCHA page after too many requests.
 const CACHE_DIR = path.join(PAGES_DIR, ".cache");
 
-function cachePathFor(url) {
+function cachePathFor(url: string): string {
   const safe = url.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 180);
   return path.join(CACHE_DIR, safe);
 }
 
-function serveFromCache(req, res) {
-  if (req.method !== "GET") return false;
+function serveFromCache(req: IncomingMessage, res: ServerResponse): boolean {
+  if (req.method !== "GET" || !req.url) return false;
   const file = cachePathFor(req.url);
   if (!fs.existsSync(file) || !fs.existsSync(`${file}.type`)) return false;
   res.writeHead(200, {
@@ -113,19 +128,20 @@ function serveFromCache(req, res) {
   return true;
 }
 
-function proxyToMoodle(req, res) {
+function proxyToMoodle(req: IncomingMessage, res: ServerResponse) {
   if (serveFromCache(req, res)) return;
 
   const targetUrl = `https://dl.nure.ua${req.url}`;
   console.log(`[Dev Server] Proxying request: ${req.url} -> ${targetUrl}`);
 
-  const options = {
-    method: req.method,
-    headers: {
-      ...req.headers,
-      host: "dl.nure.ua", // Set host header to target host
-    },
-  };
+  const options: https.RequestOptions & { headers: http.OutgoingHttpHeaders } =
+    {
+      method: req.method,
+      headers: {
+        ...req.headers,
+        host: "dl.nure.ua", // Set host header to target host
+      },
+    };
 
   // Remove connection headers that should be handled by the target/client connection
   delete options.headers["connection"];
@@ -147,20 +163,20 @@ function proxyToMoodle(req, res) {
       );
     }
 
-    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    res.writeHead(proxyRes.statusCode ?? 502, proxyRes.headers);
     if (!cacheable) {
       proxyRes.pipe(res);
       return;
     }
 
-    const chunks = [];
+    const chunks: Buffer[] = [];
     proxyRes.on("data", (chunk) => {
       chunks.push(chunk);
       res.write(chunk);
     });
     proxyRes.on("end", () => {
       res.end();
-      const file = cachePathFor(req.url);
+      const file = cachePathFor(req.url ?? "/");
       fs.mkdirSync(CACHE_DIR, { recursive: true });
       fs.writeFileSync(file, Buffer.concat(chunks));
       fs.writeFileSync(`${file}.type`, type);
@@ -168,9 +184,11 @@ function proxyToMoodle(req, res) {
   });
 
   proxyReq.on("error", (err) => {
-    console.error(`[Dev Server] Proxy error for ${req.url}: ${err.message}`);
+    console.error(
+      `[Dev Server] Proxy error for ${req.url}: ${(err as Error).message}`,
+    );
     res.writeHead(500, { "Content-Type": "text/plain" });
-    res.end(`Proxy error: ${err.message}`);
+    res.end(`Proxy error: ${(err as Error).message}`);
   });
 
   req.pipe(proxyReq);
@@ -180,7 +198,7 @@ function proxyToMoodle(req, res) {
  * Moodle's JS is stripped from mock pages, so the course index drawer would
  * stay open showing only loading placeholders. Start with it closed instead.
  */
-function closeCourseIndexDrawer(html) {
+function closeCourseIndexDrawer(html: string): string {
   return html
     .replace(/(<body[^>]*class="[^"]*)\bdrawer-open-index\b/, "$1")
     .replace(/(<div id="page"[^>]*class="[^"]*)\bshow-drawer-left\b/, "$1")
@@ -315,7 +333,7 @@ const server = http.createServer((req, res) => {
   }
 
   const parsedUrl = new URL(
-    req.url,
+    req.url ?? "/",
     `http://${req.headers.host || "localhost:3010"}`,
   );
   const pathname = parsedUrl.pathname;
@@ -376,7 +394,7 @@ const server = http.createServer((req, res) => {
       res.end(html);
     } catch (err) {
       res.writeHead(500, { "Content-Type": "text/plain" });
-      res.end(`Error scanning attempts: ${err.message}`);
+      res.end(`Error scanning attempts: ${(err as Error).message}`);
     }
     return;
   }
@@ -466,7 +484,10 @@ const server = http.createServer((req, res) => {
       res.end("Not built yet. Run pnpm dev or pnpm build first.");
       return;
     }
-    const types = { ".js": "text/javascript", ".css": "text/css" };
+    const types: Record<string, string> = {
+      ".js": "text/javascript",
+      ".css": "text/css",
+    };
     res.writeHead(200, {
       "Content-Type":
         types[path.extname(filePath)] || "application/octet-stream",
@@ -493,7 +514,7 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ success: true }));
       } catch (err) {
         res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: err.message }));
+        res.end(JSON.stringify({ error: (err as Error).message }));
       }
     });
     return;
@@ -529,7 +550,7 @@ const server = http.createServer((req, res) => {
       } catch (err) {
         console.error("[Dev Server] Error writing file:", err);
         res.writeHead(500, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: err.message }));
+        res.end(JSON.stringify({ error: (err as Error).message }));
       }
     });
     return;
