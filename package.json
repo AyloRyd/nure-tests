@@ -8,9 +8,10 @@
     "build": "tsc -b && vite build && vite build --config vite.content.config.ts",
     "lint": "eslint .",
     "typecheck": "tsc -b",
-    "check": "pnpm lint && pnpm typecheck",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
     "format": "pnpm exec prettier . --write",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "lucide-react": "^1.18.0",
@@ -30,10 +31,12 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "jsdom": "^30.1.3",
     "prettier": "^3.8.4",
     "tailwindcss": "^4.3.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.12"
+    "vite": "^8.0.12",
+    "vitest": "^5.0.5"
   }
 }
