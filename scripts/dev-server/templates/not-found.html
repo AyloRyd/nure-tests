@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Page Not Found</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background: #0f172a;
+        color: #f8fafc;
+        padding: 2rem;
+        text-align: center;
+      }
+      h1 {
+        color: #f87171;
+      }
+      a {
+        color: #38bdf8;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Saved Page Not Found</h1>
+    <p>
+      Could not find page file starting with
+      <code>page_{{ pageNum }}_</code> for attempt
+      <code>{{ attemptId }}</code> in the <code>{{ folder }}</code> folder.
+    </p>
+    <p><a href="/">&larr; Back to Dashboard</a></p>
+  </body>
+</html>

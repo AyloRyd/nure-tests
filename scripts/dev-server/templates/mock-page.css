@@ -1,0 +1,12 @@
+/* Hidden until Moodle's JS initialises them */
+.drawer.not-initialized {
+  visibility: visible;
+}
+#quiz-timer-wrapper,
+#quiznojswarning {
+  display: none !important;
+}
+.drawertoggle.hidden,
+.drawerheadercontent.hidden {
+  display: inline-flex !important;
+}
