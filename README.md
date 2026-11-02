@@ -5,6 +5,26 @@
 
 Browser extension for Moodle quizzes on [dl.nure.ua](https://dl.nure.ua). It scrapes the questions, builds a prompt you can paste into an LLM, takes the JSON answers back and ticks them on the page for you.
 
+## Installing
+
+Download `nure-tests-vX.Y.Z.zip` from the [latest release](https://github.com/AyloRyd/nure-tests/releases/latest) and unzip it. No build needed.
+
+### Loading the extension
+
+Chrome/Chromium:
+
+1. Open `chrome://extensions/`
+2. Turn on developer mode
+3. Click "Load unpacked" and pick the unzipped folder
+
+Firefox:
+
+1. Open `about:debugging`
+2. Go to "This Firefox"
+3. Click "Load Temporary Add-on" and pick `manifest.json` in the unzipped folder
+
+If you built the extension yourself, pick `dist/` (or `dist/manifest.json` in Firefox) instead.
+
 ## What it does
 
 - **Parse** – walks through every page of the attempt in the background and collects the questions. Pages that fail to load (or an expired Moodle session) are reported, with a retry button
@@ -56,10 +76,6 @@ If a quiz uses sequential navigation, Moodle won't let you go back. Scraping fet
 
 A single question mode that only parses the current page is planned.
 
-## Installing
-
-Download `nure-tests-vX.Y.Z.zip` from the [latest release](https://github.com/AyloRyd/nure-tests/releases/latest), unzip it and load the folder as described in [Loading the extension](#loading-the-extension) (pick the unzipped folder instead of `dist/`). No build needed.
-
 ## Running locally
 
 Needs [Node.js](https://nodejs.org/), [pnpm](https://pnpm.io/) and [just](https://github.com/casey/just). Run `just` to see all recipes.
@@ -77,20 +93,6 @@ The helper server:
 - loads the extension straight into a mock page with the "With extension preloaded" link (`&ext=1`). It uses the current `dist/` build and a small `chrome.*` stand-in, so it works in any browser without installing the extension
 - slows mock pages down with `&delay=500` (milliseconds), handy for looking at the parsing progress
 - caches Moodle's theme CSS, fonts and images in `.pages/.cache/`. dl.nure.ua starts answering with a CAPTCHA page after many requests, and the cache keeps mock pages styled after the first load
-
-### Loading the extension
-
-Chrome / Chromium:
-
-1. Open `chrome://extensions/`
-2. Turn on developer mode
-3. Click "Load unpacked" and pick `dist/`
-
-Firefox:
-
-1. Open `about:debugging`
-2. Go to "This Firefox"
-3. Click "Load Temporary Add-on" and pick `dist/manifest.json`
 
 ## Releasing
 
